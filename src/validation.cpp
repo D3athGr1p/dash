@@ -4014,6 +4014,28 @@ static bool ContextualCheckBlock(const CBlock& block, BlockValidationState& stat
         nSigOps += GetLegacySigOpCount(*tx);
     }
 
+    if (nHeight > Params().GetConsensus().DevRewardStartHeight) {
+        // "stage 2" interval between first and second halvings
+        CScript devPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.DevelopmentFundAddress));
+        CAmount devPayoutValue;
+
+        if (nHeight > 18000 && nHeight <= 24000) {
+            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * 18) / 100;
+        } else if (nHeight <= 87500) {
+            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * consensusParams.DevelopementFundShare) / 100;
+        } else {
+            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * (300.0/95.0)) / 100;
+        }
+
+        bool found = false;
+        for (const CTxOut& txout : block.vtx[0]->vout) {
+            if ((found = txout.scriptPubKey == devPayoutScript && txout.nValue == devPayoutValue) == true)
+                break;
+        }
+        if (!found)
+            return state.Invalid(BlockValidationResult::BLOCK_RESULT_UNSET, "Developer reward check failed");
+    }
+
     // Check sigops
     if (nSigOps > MaxBlockSigOps(fDIP0001Active_context))
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-blk-sigops", "out-of-bounds SigOpCount");
