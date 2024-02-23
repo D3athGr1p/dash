@@ -10,9 +10,9 @@
 #include <script/descriptor.h>
 #include <script/signingprovider.h>
 #include <tinyformat.h>
+#include <util/system.h>
 #include <util/strencodings.h>
 #include <util/string.h>
-#include <util/system.h>
 #include <util/translation.h>
 
 const std::string UNIX_EPOCH_TIME = "UNIX epoch time";
@@ -43,9 +43,9 @@ void RPCTypeCheckArgument(const UniValue& value, const UniValueType& typeExpecte
 }
 
 void RPCTypeCheckObj(const UniValue& o,
-                     const std::map<std::string, UniValueType>& typesExpected,
-                     bool fAllowNull,
-                     bool fStrict)
+    const std::map<std::string, UniValueType>& typesExpected,
+    bool fAllowNull,
+    bool fStrict)
 {
     for (const auto& t : typesExpected) {
         const UniValue& v = find_value(o, t.first);
@@ -54,14 +54,17 @@ void RPCTypeCheckObj(const UniValue& o,
 
         if (!(t.second.typeAny || v.type() == t.second.type || (fAllowNull && v.isNull()))) {
             std::string err = strprintf("Expected type %s for %s, got %s",
-                                        uvTypeName(t.second.type), t.first, uvTypeName(v.type()));
+                uvTypeName(t.second.type), t.first, uvTypeName(v.type()));
             throw JSONRPCError(RPC_TYPE_ERROR, err);
         }
     }
 
-    if (fStrict) {
-        for (const std::string& k : o.getKeys()) {
-            if (typesExpected.count(k) == 0) {
+    if (fStrict)
+    {
+        for (const std::string& k : o.getKeys())
+        {
+            if (typesExpected.count(k) == 0)
+            {
                 std::string err = strprintf("Unexpected key %s", k);
                 throw JSONRPCError(RPC_TYPE_ERROR, err);
             }
@@ -87,7 +90,7 @@ uint256 ParseHashV(const UniValue& v, std::string strName)
     if (64 != strHex.length())
         throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("%s must be of length %d (not %d, for '%s')", strName, 64, strHex.length(), strHex));
     if (!IsHex(strHex)) // Note: IsHex("") is false
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be hexadecimal string (not '" + strHex + "')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be hexadecimal string (not '"+strHex+"')");
     return uint256S(strHex);
 }
 uint256 ParseHashO(const UniValue& o, std::string strKey)
@@ -100,7 +103,7 @@ std::vector<unsigned char> ParseHexV(const UniValue& v, std::string strName)
     if (v.isStr())
         strHex = v.get_str();
     if (!IsHex(strHex))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be hexadecimal string (not '" + strHex + "')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be hexadecimal string (not '"+strHex+"')");
     return ParseHex(strHex);
 }
 std::vector<unsigned char> ParseHexO(const UniValue& o, std::string strKey)
@@ -108,34 +111,34 @@ std::vector<unsigned char> ParseHexO(const UniValue& o, std::string strKey)
     return ParseHexV(find_value(o, strKey), strKey);
 }
 
-int32_t ParseInt32V(const UniValue& v, const std::string& strName)
+int32_t ParseInt32V(const UniValue& v, const std::string &strName)
 {
     std::string strNum = v.getValStr();
     int32_t num;
     if (!ParseInt32(strNum, &num))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be a 32bit integer (not '" + strNum + "')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be a 32bit integer (not '"+strNum+"')");
     return num;
 }
 
-int64_t ParseInt64V(const UniValue& v, const std::string& strName)
+int64_t ParseInt64V(const UniValue& v, const std::string &strName)
 {
     std::string strNum = v.getValStr();
     int64_t num;
     if (!ParseInt64(strNum, &num))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be a 64bit integer (not '" + strNum + "')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be a 64bit integer (not '"+strNum+"')");
     return num;
 }
 
-double ParseDoubleV(const UniValue& v, const std::string& strName)
+double ParseDoubleV(const UniValue& v, const std::string &strName)
 {
     std::string strNum = v.getValStr();
     double num;
     if (!ParseDouble(strNum, &num))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be a be number (not '" + strNum + "')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be a be number (not '"+strNum+"')");
     return num;
 }
 
-bool ParseBoolV(const UniValue& v, const std::string& strName)
+bool ParseBoolV(const UniValue& v, const std::string &strName)
 {
     std::string strBool;
     if (v.isBool())
@@ -152,7 +155,7 @@ bool ParseBoolV(const UniValue& v, const std::string& strName)
     } else if (strBool == "false" || strBool == "no" || strBool == "0") {
         return false;
     }
-    throw JSONRPCError(RPC_INVALID_PARAMETER, strName + " must be true, false, yes, no, 1 or 0 (not '" + strBool + "')");
+    throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be true, false, yes, no, 1 or 0 (not '"+strBool+"')");
 }
 
 std::string HelpExampleCli(const std::string& methodname, const std::string& args)
@@ -163,9 +166,8 @@ std::string HelpExampleCli(const std::string& methodname, const std::string& arg
 std::string HelpExampleRpc(const std::string& methodname, const std::string& args)
 {
     return "> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", "
-           "\"method\": \"" +
-           methodname + "\", \"params\": [" + args + "]}' -H 'content-type: text/plain;'"
-                                                     " http://127.0.0.1:12971/\n";
+        "\"method\": \"" + methodname + "\", \"params\": [" + args + "]}' -H 'content-type: text/plain;'"
+        " http://127.0.0.1:12971/\n";
 }
 
 // Converts a hex string to a public key if possible
@@ -188,7 +190,7 @@ CPubKey AddrToPubKey(const FillableSigningProvider& keystore, const std::string&
     if (!IsValidDestination(dest)) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address: " + addr_in);
     }
-    const PKHash* pkhash = std::get_if<PKHash>(&dest);
+    const PKHash *pkhash = std::get_if<PKHash>(&dest);
     if (!pkhash) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("%s does not refer to a key", addr_in));
     }
@@ -197,7 +199,7 @@ CPubKey AddrToPubKey(const FillableSigningProvider& keystore, const std::string&
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("no full public key for address %s", addr_in));
     }
     if (!vchPubKey.IsFullyValid()) {
-        throw JSONRPCError(RPC_INTERNAL_ERROR, "Wallet contains an invalid public key");
+       throw JSONRPCError(RPC_INTERNAL_ERROR, "Wallet contains an invalid public key");
     }
     return vchPubKey;
 }
@@ -229,19 +231,18 @@ CTxDestination AddAndGetMultisigDestination(const int required, const std::vecto
 class DescribeAddressVisitor
 {
 public:
+
     explicit DescribeAddressVisitor() {}
 
-    UniValue operator()(const CNoDestination& dest) const { return UniValue(UniValue::VOBJ); }
+    UniValue operator()(const CNoDestination &dest) const { return UniValue(UniValue::VOBJ); }
 
-    UniValue operator()(const PKHash& pkhash) const
-    {
+    UniValue operator()(const PKHash &pkhash) const {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isscript", false);
         return obj;
     }
 
-    UniValue operator()(const ScriptHash& scriptID) const
-    {
+    UniValue operator()(const ScriptHash &scriptID) const {
         UniValue obj(UniValue::VOBJ);
         obj.pushKV("isscript", true);
         return obj;
@@ -267,8 +268,8 @@ unsigned int ParseConfirmTarget(const UniValue& value, unsigned int max_target)
  * later on
  */
 struct Section {
-    Section(const std::string& left, const std::string& right) :
-        m_left{left}, m_right{right} {}
+    Section(const std::string& left, const std::string& right)
+        : m_left{left}, m_right{right} {}
     std::string m_left;
     const std::string m_right;
 };
@@ -371,7 +372,7 @@ struct Sections {
             while (true) {
                 right += s.m_right.substr(begin, new_line_pos - begin);
                 if (new_line_pos == std::string::npos) {
-                    break; // No new line
+                    break; //No new line
                 }
                 right += "\n" + std::string(pad, ' ');
                 begin = s.m_right.find_first_not_of(' ', new_line_pos + 1);
@@ -387,16 +388,16 @@ struct Sections {
     }
 };
 
-RPCHelpMan::RPCHelpMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples) :
-    RPCHelpMan{std::move(name), std::move(description), std::move(args), std::move(results), std::move(examples), nullptr} {}
+RPCHelpMan::RPCHelpMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples)
+    : RPCHelpMan{std::move(name), std::move(description), std::move(args), std::move(results), std::move(examples), nullptr} {}
 
-RPCHelpMan::RPCHelpMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCMethodImpl fun) :
-    m_name{std::move(name)},
-    m_fun{std::move(fun)},
-    m_description{std::move(description)},
-    m_args{std::move(args)},
-    m_results{std::move(results)},
-    m_examples{std::move(examples)}
+RPCHelpMan::RPCHelpMan(std::string name, std::string description, std::vector<RPCArg> args, RPCResults results, RPCExamples examples, RPCMethodImpl fun)
+    : m_name{std::move(name)},
+      m_fun{std::move(fun)},
+      m_description{std::move(description)},
+      m_args{std::move(args)},
+      m_results{std::move(results)},
+      m_examples{std::move(examples)}
 {
     std::set<std::string> named_args;
     for (const auto& arg : m_args) {
@@ -596,7 +597,9 @@ void RPCResult::ToSections(Sections& sections, const OuterType outer_type, const
 
     // The key name if recursed into an dictionary
     const std::string maybe_key{
-        outer_type == OuterType::OBJ ? "\"" + this->m_key_name + "\" : " : ""};
+        outer_type == OuterType::OBJ ?
+            "\"" + this->m_key_name + "\" : " :
+            ""};
 
     // Format description with type
     const auto Description = [&](const std::string& type) {
@@ -780,18 +783,18 @@ std::pair<int64_t, int64_t> ParseDescriptorRange(const UniValue& value)
 RPCErrorCode RPCErrorFromTransactionError(TransactionError terr)
 {
     switch (terr) {
-    case TransactionError::MEMPOOL_REJECTED:
-        return RPC_TRANSACTION_REJECTED;
-    case TransactionError::ALREADY_IN_CHAIN:
-        return RPC_TRANSACTION_ALREADY_IN_CHAIN;
-    case TransactionError::P2P_DISABLED:
-        return RPC_CLIENT_P2P_DISABLED;
-    case TransactionError::INVALID_PSBT:
-    case TransactionError::PSBT_MISMATCH:
-        return RPC_INVALID_PARAMETER;
-    case TransactionError::SIGHASH_MISMATCH:
-        return RPC_DESERIALIZATION_ERROR;
-    default: break;
+        case TransactionError::MEMPOOL_REJECTED:
+            return RPC_TRANSACTION_REJECTED;
+        case TransactionError::ALREADY_IN_CHAIN:
+            return RPC_TRANSACTION_ALREADY_IN_CHAIN;
+        case TransactionError::P2P_DISABLED:
+            return RPC_CLIENT_P2P_DISABLED;
+        case TransactionError::INVALID_PSBT:
+        case TransactionError::PSBT_MISMATCH:
+            return RPC_INVALID_PARAMETER;
+        case TransactionError::SIGHASH_MISMATCH:
+            return RPC_DESERIALIZATION_ERROR;
+        default: break;
     }
     return RPC_TRANSACTION_ERROR;
 }

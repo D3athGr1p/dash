@@ -31,16 +31,16 @@
 #include <event2/keyvalq_struct.h>
 #include <support/events.h>
 
-#include <compat/stdin.h>
 #include <univalue.h>
+#include <compat/stdin.h>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 UrlDecodeFn* const URL_DECODE = urlDecode;
 
 static const char DEFAULT_RPCCONNECT[] = "127.0.0.1";
-static const int DEFAULT_HTTP_CLIENT_TIMEOUT = 900;
-static const bool DEFAULT_NAMED = false;
-static const int CONTINUE_EXECUTION = -1;
+static const int DEFAULT_HTTP_CLIENT_TIMEOUT=900;
+static const bool DEFAULT_NAMED=false;
+static const int CONTINUE_EXECUTION=-1;
 
 /** Default number of blocks to generate for RPC generatetoaddress. */
 static const std::string DEFAULT_NBLOCKS = "1";
@@ -76,7 +76,7 @@ static void SetupCliArgs(ArgsManager& argsman)
 }
 
 /** libevent event log callback */
-static void libevent_log_cb(int severity, const char* msg)
+static void libevent_log_cb(int severity, const char *msg)
 {
     // Ignore everything other than errors
     if (severity >= EVENT_LOG_ERR) {
@@ -96,10 +96,11 @@ static void libevent_log_cb(int severity, const char* msg)
 class CConnectionFailed : public std::runtime_error
 {
 public:
+
     explicit inline CConnectionFailed(const std::string& msg) :
         std::runtime_error(msg)
-    {
-    }
+    {}
+
 };
 
 //
@@ -127,10 +128,10 @@ static int AppInitRPC(int argc, char* argv[])
         std::string strUsage = PACKAGE_NAME " RPC client version " + FormatFullVersion() + "\n";
         if (!gArgs.IsArgSet("-version")) {
             strUsage += "\n"
-                        "Usage:  dash-cli [options] <command> [params]  Send command to " PACKAGE_NAME "\n"
-                        "or:     dash-cli [options] -named <command> [name=value]...  Send command to " PACKAGE_NAME " (with named arguments)\n"
-                        "or:     dash-cli [options] help                List commands\n"
-                        "or:     dash-cli [options] help <command>      Get help for a command\n";
+                "Usage:  dash-cli [options] <command> [params]  Send command to " PACKAGE_NAME "\n"
+                "or:     dash-cli [options] -named <command> [name=value]...  Send command to " PACKAGE_NAME " (with named arguments)\n"
+                "or:     dash-cli [options] help                List commands\n"
+                "or:     dash-cli [options] help <command>      Get help for a command\n";
             strUsage += "\n" + gArgs.GetHelpMessage();
         }
 
@@ -161,18 +162,18 @@ static int AppInitRPC(int argc, char* argv[])
 
 
 /** Reply structure for request_done to fill in */
-struct HTTPReply {
-    HTTPReply() :
-        status(0), error(-1) {}
+struct HTTPReply
+{
+    HTTPReply(): status(0), error(-1) {}
 
     int status;
     int error;
     std::string body;
 };
 
-static const char* http_errorstring(int code)
+static const char *http_errorstring(int code)
 {
-    switch (code) {
+    switch(code) {
 #if LIBEVENT_VERSION_NUMBER >= 0x02010300
     case EVREQ_HTTP_TIMEOUT:
         return "timeout reached";
@@ -192,9 +193,9 @@ static const char* http_errorstring(int code)
     }
 }
 
-static void http_request_done(struct evhttp_request* req, void* ctx)
+static void http_request_done(struct evhttp_request *req, void *ctx)
 {
-    HTTPReply* reply = static_cast<HTTPReply*>(ctx);
+    HTTPReply *reply = static_cast<HTTPReply*>(ctx);
 
     if (req == nullptr) {
         /* If req is nullptr, it means an error occurred while connecting: the
@@ -206,10 +207,11 @@ static void http_request_done(struct evhttp_request* req, void* ctx)
 
     reply->status = evhttp_request_get_response_code(req);
 
-    struct evbuffer* buf = evhttp_request_get_input_buffer(req);
-    if (buf) {
+    struct evbuffer *buf = evhttp_request_get_input_buffer(req);
+    if (buf)
+    {
         size_t size = evbuffer_get_length(buf);
-        const char* data = (const char*)evbuffer_pullup(buf, size);
+        const char *data = (const char*)evbuffer_pullup(buf, size);
         if (data)
             reply->body = std::string(data, size);
         evbuffer_drain(buf, size);
@@ -217,9 +219,9 @@ static void http_request_done(struct evhttp_request* req, void* ctx)
 }
 
 #if LIBEVENT_VERSION_NUMBER >= 0x02010300
-static void http_error_cb(enum evhttp_request_error err, void* ctx)
+static void http_error_cb(enum evhttp_request_error err, void *ctx)
 {
-    HTTPReply* reply = static_cast<HTTPReply*>(ctx);
+    HTTPReply *reply = static_cast<HTTPReply*>(ctx);
     reply->error = err;
 }
 #endif
@@ -232,11 +234,11 @@ class BaseRequestHandler
 public:
     virtual ~BaseRequestHandler() {}
     virtual UniValue PrepareRequest(const std::string& method, const std::vector<std::string>& args) = 0;
-    virtual UniValue ProcessReply(const UniValue& batch_in) = 0;
+    virtual UniValue ProcessReply(const UniValue &batch_in) = 0;
 };
 
 /** Process getinfo requests */
-class GetinfoRequestHandler : public BaseRequestHandler
+class GetinfoRequestHandler: public BaseRequestHandler
 {
 public:
     const int ID_NETWORKINFO = 0;
@@ -259,7 +261,7 @@ public:
     }
 
     /** Collect values from the batch and form a simulated `getinfo` reply. */
-    UniValue ProcessReply(const UniValue& batch_in) override
+    UniValue ProcessReply(const UniValue &batch_in) override
     {
         UniValue result(UniValue::VOBJ);
         const std::vector<UniValue> batch = JSONRPCProcessBatchReply(batch_in);
@@ -542,26 +544,24 @@ public:
         return JSONRPCRequestObj("generatetoaddress", params, 1);
     }
 
-    UniValue ProcessReply(const UniValue& reply) override
+    UniValue ProcessReply(const UniValue &reply) override
     {
         UniValue result(UniValue::VOBJ);
         result.pushKV("address", address_str);
         result.pushKV("blocks", reply.get_obj()["result"]);
         return JSONRPCReplyObj(result, NullUniValue, 1);
     }
-
 protected:
     std::string address_str;
 };
 
 /** Process default single requests */
-class DefaultRequestHandler : public BaseRequestHandler
-{
+class DefaultRequestHandler: public BaseRequestHandler {
 public:
     UniValue PrepareRequest(const std::string& method, const std::vector<std::string>& args) override
     {
         UniValue params;
-        if (gArgs.GetBoolArg("-named", DEFAULT_NAMED)) {
+        if(gArgs.GetBoolArg("-named", DEFAULT_NAMED)) {
             params = RPCConvertNamedValues(method, args);
         } else {
             params = RPCConvertValues(method, args);
@@ -569,7 +569,7 @@ public:
         return JSONRPCRequestObj(method, params, 1);
     }
 
-    UniValue ProcessReply(const UniValue& reply) override
+    UniValue ProcessReply(const UniValue &reply) override
     {
         return reply.get_obj();
     }
@@ -805,7 +805,7 @@ static void SetGenerateToAddressArgs(const std::string& address, std::vector<std
     args.emplace(args.begin() + 1, address);
 }
 
-static int CommandLineRPC(int argc, char* argv[])
+static int CommandLineRPC(int argc, char *argv[])
 {
     std::string strPrint;
     int nRet = 0;
