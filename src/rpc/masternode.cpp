@@ -458,7 +458,7 @@ static UniValue masternode_payments(const JSONRPCRequest& request, const Chainst
 
         std::vector<CTxOut> voutMasternodePayments, voutDummy;
         CMutableTransaction dummyTx;
-        CAmount blockSubsidy = GetBlockSubsidy(pindex, Params().GetConsensus());
+        CAmount blockSubsidy = GetBlockSubsidy(pindex->nHeight, Params().GetConsensus());
         MasternodePayments::FillBlockPayments(*sporkManager, *governance, dummyTx, pindex->pprev, blockSubsidy, nBlockFees, voutMasternodePayments, voutDummy);
 
         UniValue blockObj(UniValue::VOBJ);

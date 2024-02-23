@@ -1195,31 +1195,110 @@ CAmount GetBlockSubsidyInner(int nPrevBits, int nPrevHeight, const Consensus::Pa
     return nSubsidy;
 }
 
-CAmount GetBlockSubsidy(const CBlockIndex* const pindex, const Consensus::Params& consensusParams)
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
-    if (pindex->pprev == nullptr) return Params().GenesisBlock().vtx[0]->GetValueOut();
-    bool isV20Active = llmq::utils::IsV20Active(pindex->pprev);
-    return GetBlockSubsidyInner(pindex->pprev->nBits, pindex->pprev->nHeight, consensusParams, isV20Active);
+    CAmount nSubsidyBase;
+    int nPrevHeight = nHeight - 1;
+
+    if (nPrevHeight == 0) {
+        nSubsidyBase = 3000000;
+    } else if (nPrevHeight <= 6000 ) {
+        nSubsidyBase = 2000;
+    } else if (nPrevHeight <= 14000) {
+        nSubsidyBase = 1000;
+    } else if (nPrevHeight <= 24000) {
+        nSubsidyBase = 800;
+    } else if (nPrevHeight <= 44000) {
+        nSubsidyBase = 600;
+    } else if (nPrevHeight <= 74000) {
+        nSubsidyBase = 400;
+    } else if (nPrevHeight <= 87500) {
+        nSubsidyBase = 300;
+    } else if (nPrevHeight <= 172000) {
+        nSubsidyBase = 150;
+    } else if (nPrevHeight <= 316000) {
+        nSubsidyBase = 120;
+    } else if (nPrevHeight <= 460000) {
+        nSubsidyBase = 100;
+    } else if (nPrevHeight <= 604000) {
+        nSubsidyBase = 80;
+    } else if (nPrevHeight <= 748000) {
+        nSubsidyBase = 65;
+    } else if (nPrevHeight <= 892000) {
+        nSubsidyBase = 50;
+    } else if (nPrevHeight <= 1036000) {
+        nSubsidyBase = 40;
+    } else if (nPrevHeight <= 1180000) {
+        nSubsidyBase = 30;
+    } else if (nPrevHeight <= 1324000) {
+        nSubsidyBase = 25;
+    } else if (nPrevHeight <= 1468000) {
+        nSubsidyBase = 20;
+    } else if (nPrevHeight <= 1612000) {
+        nSubsidyBase = 15;
+    } else if (nPrevHeight <= 1756000) {
+        nSubsidyBase = 12;
+    } else if (nPrevHeight <= 1900000) {
+        nSubsidyBase = 10;
+    } else if (nPrevHeight <= 2044000) {
+        nSubsidyBase = 9;
+    } else if (nPrevHeight <= 2188000) {
+        nSubsidyBase = 8;
+    } else if (nPrevHeight <= 2332000) {
+        nSubsidyBase = 7;
+    } else if (nPrevHeight <= 2476000) {
+        nSubsidyBase = 6;
+    } else if (nPrevHeight <= 2620000) {
+        nSubsidyBase = 5;
+    } else if (nPrevHeight <= 2764000) {
+        nSubsidyBase = 4;
+    } else if (nPrevHeight <= 2908000) {
+        nSubsidyBase = 3;
+    } else if (nPrevHeight <= 3052000) {
+        nSubsidyBase = 2;
+    } else if (nPrevHeight <= 3196000) {
+        nSubsidyBase = 1;
+    } else if (nPrevHeight <= 3340000) {
+        nSubsidyBase = 0.5;
+    } else if (nPrevHeight <= 3648000) {
+        nSubsidyBase = 0.25;
+    } else {
+	    nSubsidyBase = 0;
+    }
+
+    CAmount nSubsidy = nSubsidyBase * COIN;
+
+    // this is only active on devnets
+    if (nPrevHeight < consensusParams.nHighSubsidyBlocks) {
+        nSubsidy *= consensusParams.nHighSubsidyFactor;
+    }
+
+    CAmount nSuperblockPart; 
+    if (nPrevHeight < 16700) {
+        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
+    } else {
+        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
+    }
+
+    return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
 }
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue, bool fV20Active)
 {
-    CAmount ret = blockValue/5; // start at 20%
-
-    const int nMNPIBlock = Params().GetConsensus().nMasternodePaymentsIncreaseBlock;
-    const int nMNPIPeriod = Params().GetConsensus().nMasternodePaymentsIncreasePeriod;
     const int nReallocActivationHeight = Params().GetConsensus().BRRHeight;
 
-                                                                      // mainnet:
-    if(nHeight > nMNPIBlock)                  ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 1)) ret += blockValue / 20; // 175280 - 30.0% - 2014-11-25
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 2)) ret += blockValue / 20; // 192560 - 35.0% - 2014-12-26
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 3)) ret += blockValue / 40; // 209840 - 37.5% - 2015-01-26
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 4)) ret += blockValue / 40; // 227120 - 40.0% - 2015-02-27
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 5)) ret += blockValue / 40; // 244400 - 42.5% - 2015-03-30
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
+    if (nHeight > 16700) {
+        if (nHeight <= 18000) {
+            return static_cast<CAmount>(blockValue * 0.30);
+        }else if (nHeight <= 24000) {
+            return static_cast<CAmount>(blockValue * 0.335);
+        } else if (nHeight <= 87500){
+            return static_cast<CAmount>(blockValue * 0.485);
+        } else {
+            return static_cast<CAmount>(blockValue * (48.0/95.0));
+        }
+    }
+    CAmount ret = blockValue * 0.5;
 
     if (nHeight < nReallocActivationHeight) {
         // Block Reward Realocation is not activated yet, nothing to do
@@ -1227,48 +1306,14 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue, bool fV20Active)
     }
 
     int nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
-    // Actual realocation starts in the cycle next to one activation happens in
+
     int nReallocStart = nReallocActivationHeight - nReallocActivationHeight % nSuperblockCycle + nSuperblockCycle;
 
     if (nHeight < nReallocStart) {
-        // Activated but we have to wait for the next cycle to start realocation, nothing to do
         return ret;
     }
 
-    if (fV20Active) {
-        // Once MNRewardReallocated activates, block reward is 80% of block subsidy (+ tx fees) since treasury is 20%
-        // Since the MN reward needs to be equal to 60% of the block subsidy (according to the proposal), MN reward is set to 75% of the block reward.
-        // Previous reallocation periods are dropped.
-        return blockValue * 3 / 4;
-    }
-
-    // Periods used to reallocate the masternode reward from 50% to 60%
-    static std::vector<int> vecPeriods{
-        513, // Period 1:  51.3%
-        526, // Period 2:  52.6%
-        533, // Period 3:  53.3%
-        540, // Period 4:  54%
-        546, // Period 5:  54.6%
-        552, // Period 6:  55.2%
-        557, // Period 7:  55.7%
-        562, // Period 8:  56.2%
-        567, // Period 9:  56.7%
-        572, // Period 10: 57.2%
-        577, // Period 11: 57.7%
-        582, // Period 12: 58.2%
-        585, // Period 13: 58.5%
-        588, // Period 14: 58.8%
-        591, // Period 15: 59.1%
-        594, // Period 16: 59.4%
-        597, // Period 17: 59.7%
-        599, // Period 18: 59.9%
-        600  // Period 19: 60%
-    };
-
-    int nReallocCycle = nSuperblockCycle * 3;
-    int nCurrentPeriod = std::min<int>((nHeight - nReallocStart) / nReallocCycle, vecPeriods.size() - 1);
-
-    return static_cast<CAmount>(blockValue * vecPeriods[nCurrentPeriod] / 1000);
+    return static_cast<CAmount>(blockValue * 1);
 }
 
 CoinsViews::CoinsViews(
@@ -2385,7 +2430,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     // DASH : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
 
     // TODO: resync data (both ways?) and try to reprocess this block later.
-    CAmount blockSubsidy = GetBlockSubsidy(pindex, m_params.GetConsensus());
+    CAmount blockSubsidy = GetBlockSubsidy(pindex->nHeight, m_params.GetConsensus());
     CAmount feeReward = nFees;
     std::string strError = "";
 

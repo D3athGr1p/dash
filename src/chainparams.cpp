@@ -161,48 +161,48 @@ public:
     CMainParams()
     {
         strNetworkID = CBaseChainParams::MAIN;
-        consensus.nSubsidyHalvingInterval = 210240; // Note: actual number of blocks per calendar year with DGW v3 is ~200700 (for example 449750 - 249050)
+        consensus.nSubsidyHalvingInterval = 22000; // Note: actual number of blocks per calendar year with DGW v3 is ~200700 (for example 449750 - 249050)
         consensus.BIP16Height = 0;
-        consensus.nMasternodePaymentsStartBlock = 100000;       // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
+        consensus.nMasternodePaymentsStartBlock = 1;       // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
         consensus.nMasternodePaymentsIncreaseBlock = 158000;    // actual historical value
         consensus.nMasternodePaymentsIncreasePeriod = 576 * 30; // 17280 - actual historical value
-        consensus.nInstantSendConfirmationsRequired = 6;
+        consensus.nInstantSendConfirmationsRequired = 4;
         consensus.nInstantSendKeepLock = 24;
-        consensus.nBudgetPaymentsStartBlock = 328008; // actual historical value
-        consensus.nBudgetPaymentsCycleBlocks = 16616; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
+        consensus.nBudgetPaymentsStartBlock = 1; // actual historical value
+        consensus.nBudgetPaymentsCycleBlocks = 14600; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
         consensus.nBudgetPaymentsWindowBlocks = 100;
-        consensus.nSuperblockStartBlock = 614820; // The block at which 12.1 goes live (end of final 12.0 budget cycle)
-        consensus.nSuperblockStartHash = uint256S("0000000000020cb27c7ef164d21003d5d20cdca2f54dd9a9ca6d45f4d47f8aa3");
-        consensus.nSuperblockCycle = 16616;         // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
+        consensus.nSuperblockStartBlock = 1; // The block at which 12.1 goes live (end of final 12.0 budget cycle)
+        consensus.nSuperblockStartHash = uint256S("0x");
+        consensus.nSuperblockCycle = 14600;         // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
         consensus.nSuperblockMaturityWindow = 1662; // ~(60*24*3)/2.6, ~3 days before actual Superblock is emitted
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
-        consensus.nMasternodeMinimumConfirmations = 15;
-        consensus.BIP34Height = 951;
-        consensus.BIP34Hash = uint256S("0x000001f35e70f7c5705f64c6c5cc3dea9449e74d5b5c7cf74dad1bcca14a8012");
-        consensus.BIP65Height = 619382;   // 00000000000076d8fcea02ec0963de4abfd01e771fec0863f960c2c64fe6f357
-        consensus.BIP66Height = 245817;   // 00000000000b1fa2dfa312863570e13fae9ca7b5566cb27e55422620b469aefa
+        consensus.nMasternodeMinimumConfirmations = 6;
+        consensus.BIP34Height = 1;
+        consensus.BIP34Hash = uint256S("0x");
+        consensus.BIP65Height = 1;   // 00000000000076d8fcea02ec0963de4abfd01e771fec0863f960c2c64fe6f357
+        consensus.BIP66Height = 1;   // 00000000000b1fa2dfa312863570e13fae9ca7b5566cb27e55422620b469aefa
         consensus.BIP147Height = 939456;  // 00000000000000117befca4fab5622514772f608852e5edd8df9c55464b6fe37
         consensus.CSVHeight = 622944;     // 00000000000002e3d3a6224cfce80bae367fd3283d1e5a8ba50e5e60b2d2905d
-        consensus.DIP0001Height = 782208; // 000000000000000cbc9cb551e8ee1ac7aa223585cbdfb755d3683bafd93679e4
-        consensus.DIP0003Height = 1028160;
-        consensus.DIP0003EnforcementHeight = 1047200;
-        consensus.DIP0003EnforcementHash = uint256S("000000000000002d1734087b4c5afc3133e4e1c3e1a89218f62bcd9bb3d17f81");
-        consensus.DIP0008Height = 1088640;                                                                 // 00000000000000112e41e4b3afda8b233b8cc07c532d2eac5de097b68358c43e
-        consensus.BRRHeight = 1374912;                                                                     // 000000000000000c5a124f3eccfbe6e17876dca79cec9e63dfa70d269113c926
+        consensus.DIP0001Height = 2; // 000000000000000cbc9cb551e8ee1ac7aa223585cbdfb755d3683bafd93679e4
+        consensus.DIP0003Height = 2;
+        consensus.DIP0003EnforcementHeight = 2;
+        consensus.DIP0003EnforcementHash = uint256S("0x");
+        consensus.DIP0008Height = 2;                                                                 // 00000000000000112e41e4b3afda8b233b8cc07c532d2eac5de097b68358c43e
+        consensus.BRRHeight = 12096;                                                                     // 000000000000000c5a124f3eccfbe6e17876dca79cec9e63dfa70d269113c926
         consensus.DIP0020Height = 1516032;                                                                 // 000000000000000f64ed3bd9af1078177ac026f6aa2677aa4d8beeae43be56cc
         consensus.DIP0024Height = 1737792;                                                                 // 0000000000000001342be9c0b75ad40c276beaad91616423c4d9cb101b3db438
         consensus.V19Height = 1899072;                                                                     // 0000000000000015e32e73052d663626327004c81c5c22cb8b42c361015c0eae
         consensus.MinBIP9WarningHeight = 1899072 + 2016;                                                   // V19 activation height + miner confirmation window
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
-        consensus.nPowTargetTimespan = 24 * 60 * 60;                                                       // Dash: 1 day
-        consensus.nPowTargetSpacing = 2.5 * 60;                                                            // Dash: 2.5 minutes
+        consensus.nPowTargetTimespan = 9 * 60 * 60;                                                       // Dash: 1 day
+        consensus.nPowTargetSpacing = 3 * 60;                                                            // Dash: 2.5 minutes
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nPowKGWHeight = 15200;
-        consensus.nPowDGWHeight = 34140;
-        consensus.nRuleChangeActivationThreshold = 1916; // 95% of 2016
-        consensus.nMinerConfirmationWindow = 2016;       // nPowTargetTimespan / nPowTargetSpacing
+        consensus.nPowKGWHeight = 1;
+        consensus.nPowDGWHeight = 1;
+        consensus.nRuleChangeActivationThreshold = 3; // 95% of 2016
+        consensus.nMinerConfirmationWindow = 3;       // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999;   // December 31, 2008
@@ -236,10 +236,10 @@ public:
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-        pchMessageStart[0] = 0xbf;
-        pchMessageStart[1] = 0x0c;
-        pchMessageStart[2] = 0x6b;
-        pchMessageStart[3] = 0xbd;
+        pchMessageStart[0] = 0xee;
+        pchMessageStart[1] = 0x88;
+        pchMessageStart[2] = 0x06;
+        pchMessageStart[3] = 0x3f;
         nDefaultPort = 12972;
         nDefaultPlatformP2PPort = 26656;
         nDefaultPlatformHTTPPort = 443;
@@ -247,7 +247,7 @@ public:
         m_assumed_blockchain_size = 45;
         m_assumed_chain_state_size = 1;
 
-        genesis = CreateGenesisBlock(1390095618, 28917698, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1688101642, 144927, 0x1e0ffff0, 1, 2000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
         assert(consensus.hashGenesisBlock == uint256S("0x000000fd77883d82808c84b94839f98aaf7f8abae61afb8d5b771f982f19fe74"));
         assert(genesis.hashMerkleRoot == uint256S("0x1a63dcfbc0f45c53796d840fcc2f2b155d5c55abcb54776be4bdd9dd1487bfa3"));
