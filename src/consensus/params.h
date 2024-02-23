@@ -146,11 +146,21 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
+    int64_t nNewPowTargetSpacing;
+    int64_t nNewPowTargetSpacingForkHeight;
     int nPowKGWHeight;
     int nPowDGWHeight;
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
+
+    int64_t GetCurrentPowTargetSpacing(const int& nHeight) const
+    {
+        if (nHeight > nNewPowTargetSpacingForkHeight)
+            return nNewPowTargetSpacing;
+        else
+            return nPowTargetSpacing;
+    }
 
     /** these parameters are only used on devnet and can be configured from the outside */
     int nMinimumDifficultyBlocks{0};
