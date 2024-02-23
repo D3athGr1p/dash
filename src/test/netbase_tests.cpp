@@ -55,7 +55,6 @@ BOOST_AUTO_TEST_CASE(netbase_networks)
 
 BOOST_AUTO_TEST_CASE(netbase_properties)
 {
-
     BOOST_CHECK(ResolveIP("127.0.0.1").IsIPv4());
     BOOST_CHECK(ResolveIP("::FFFF:192.168.1.1").IsIPv4());
     BOOST_CHECK(ResolveIP("::1").IsIPv6());
@@ -81,7 +80,6 @@ BOOST_AUTO_TEST_CASE(netbase_properties)
     BOOST_CHECK(ResolveIP("127.0.0.1").IsValid());
     BOOST_CHECK(CreateInternal("FD6B:88C0:8724:edb1:8e4:3588:e546:35ca").IsInternal());
     BOOST_CHECK(CreateInternal("bar.com").IsInternal());
-
 }
 
 bool static TestSplitHost(const std::string& test, const std::string& host, uint16_t port)
@@ -99,15 +97,15 @@ BOOST_AUTO_TEST_CASE(netbase_splithost)
     BOOST_CHECK(TestSplitHost("www.bitcoin.org:80", "www.bitcoin.org", 80));
     BOOST_CHECK(TestSplitHost("[www.bitcoin.org]:80", "www.bitcoin.org", 80));
     BOOST_CHECK(TestSplitHost("127.0.0.1", "127.0.0.1", 0));
-    BOOST_CHECK(TestSplitHost("127.0.0.1:9999", "127.0.0.1", 9999));
+    BOOST_CHECK(TestSplitHost("127.0.0.1:12972", "127.0.0.1", 12972));
     BOOST_CHECK(TestSplitHost("[127.0.0.1]", "127.0.0.1", 0));
-    BOOST_CHECK(TestSplitHost("[127.0.0.1]:9999", "127.0.0.1", 9999));
+    BOOST_CHECK(TestSplitHost("[127.0.0.1]:12972", "127.0.0.1", 12972));
     BOOST_CHECK(TestSplitHost("::ffff:127.0.0.1", "::ffff:127.0.0.1", 0));
-    BOOST_CHECK(TestSplitHost("[::ffff:127.0.0.1]:9999", "::ffff:127.0.0.1", 9999));
-    BOOST_CHECK(TestSplitHost("[::]:9999", "::", 9999));
-    BOOST_CHECK(TestSplitHost("::9999", "::9999", 0));
-    BOOST_CHECK(TestSplitHost(":9999", "", 9999));
-    BOOST_CHECK(TestSplitHost("[]:9999", "", 9999));
+    BOOST_CHECK(TestSplitHost("[::ffff:127.0.0.1]:12972", "::ffff:127.0.0.1", 12972));
+    BOOST_CHECK(TestSplitHost("[::]:12972", "::", 12972));
+    BOOST_CHECK(TestSplitHost("::12972", "::12972", 0));
+    BOOST_CHECK(TestSplitHost(":12972", "", 12972));
+    BOOST_CHECK(TestSplitHost("[]:12972", "", 12972));
     BOOST_CHECK(TestSplitHost("", "", 0));
 }
 
@@ -120,10 +118,10 @@ bool static TestParse(std::string src, std::string canon)
 BOOST_AUTO_TEST_CASE(netbase_lookupnumeric)
 {
     BOOST_CHECK(TestParse("127.0.0.1", "127.0.0.1:65535"));
-    BOOST_CHECK(TestParse("127.0.0.1:9999", "127.0.0.1:9999"));
+    BOOST_CHECK(TestParse("127.0.0.1:12972", "127.0.0.1:12972"));
     BOOST_CHECK(TestParse("::ffff:127.0.0.1", "127.0.0.1:65535"));
     BOOST_CHECK(TestParse("::", "[::]:65535"));
-    BOOST_CHECK(TestParse("[::]:9999", "[::]:9999"));
+    BOOST_CHECK(TestParse("[::]:12972", "[::]:12972"));
     BOOST_CHECK(TestParse("[127.0.0.1]", "127.0.0.1:65535"));
     BOOST_CHECK(TestParse(":::", "[::]:0"));
 
@@ -143,7 +141,6 @@ BOOST_AUTO_TEST_CASE(embedded_test)
 
 BOOST_AUTO_TEST_CASE(subnet_test)
 {
-
     BOOST_CHECK(ResolveSubNet("1.2.3.0/24") == ResolveSubNet("1.2.3.0/255.255.255.0"));
     BOOST_CHECK(ResolveSubNet("1.2.3.0/24") != ResolveSubNet("1.2.4.0/255.255.255.0"));
     BOOST_CHECK(ResolveSubNet("1.2.3.0/24").Match(ResolveIP("1.2.3.4")));
@@ -188,7 +185,7 @@ BOOST_AUTO_TEST_CASE(subnet_test)
     BOOST_CHECK(!ResolveSubNet("1:2:3:4:5:6:7:8/129").IsValid());
     BOOST_CHECK(!ResolveSubNet("fuzzy").IsValid());
 
-    //CNetAddr constructor test
+    // CNetAddr constructor test
     BOOST_CHECK(CSubNet(ResolveIP("127.0.0.1")).IsValid());
     BOOST_CHECK(CSubNet(ResolveIP("127.0.0.1")).Match(ResolveIP("127.0.0.1")));
     BOOST_CHECK(!CSubNet(ResolveIP("127.0.0.1")).Match(ResolveIP("127.0.0.2")));
@@ -316,18 +313,18 @@ BOOST_AUTO_TEST_CASE(subnet_test)
 
 BOOST_AUTO_TEST_CASE(netbase_getgroup)
 {
-    std::vector<bool> asmap; // use /16
-    BOOST_CHECK(ResolveIP("127.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0})); // Local -> !Routable()
-    BOOST_CHECK(ResolveIP("257.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0})); // !Valid -> !Routable()
-    BOOST_CHECK(ResolveIP("10.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0})); // RFC1918 -> !Routable()
-    BOOST_CHECK(ResolveIP("169.254.1.1").GetGroup(asmap) == std::vector<unsigned char>({0})); // RFC3927 -> !Routable()
-    BOOST_CHECK(ResolveIP("1.2.3.4").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2})); // IPv4
-    BOOST_CHECK(ResolveIP("::FFFF:0:102:304").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2})); // RFC6145
-    BOOST_CHECK(ResolveIP("64:FF9B::102:304").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2})); // RFC6052
-    BOOST_CHECK(ResolveIP("2002:102:304:9999:9999:9999:9999:9999").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2})); // RFC3964
-    BOOST_CHECK(ResolveIP("2001:0:9999:9999:9999:9999:FEFD:FCFB").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2})); // RFC4380
-    BOOST_CHECK(ResolveIP("2001:470:abcd:9999:9999:9999:9999:9999").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV6, 32, 1, 4, 112, 175})); //he.net
-    BOOST_CHECK(ResolveIP("2001:2001:9999:9999:9999:9999:9999:9999").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV6, 32, 1, 32, 1})); //IPv6
+    std::vector<bool> asmap;                                                                                                                                            // use /16
+    BOOST_CHECK(ResolveIP("127.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0}));                                                                             // Local -> !Routable()
+    BOOST_CHECK(ResolveIP("257.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0}));                                                                             // !Valid -> !Routable()
+    BOOST_CHECK(ResolveIP("10.0.0.1").GetGroup(asmap) == std::vector<unsigned char>({0}));                                                                              // RFC1918 -> !Routable()
+    BOOST_CHECK(ResolveIP("169.254.1.1").GetGroup(asmap) == std::vector<unsigned char>({0}));                                                                           // RFC3927 -> !Routable()
+    BOOST_CHECK(ResolveIP("1.2.3.4").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2}));                                                   // IPv4
+    BOOST_CHECK(ResolveIP("::FFFF:0:102:304").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2}));                                          // RFC6145
+    BOOST_CHECK(ResolveIP("64:FF9B::102:304").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2}));                                          // RFC6052
+    BOOST_CHECK(ResolveIP("2002:102:304:12972:12972:12972:12972:12972").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2}));                // RFC3964
+    BOOST_CHECK(ResolveIP("2001:0:12972:12972:12972:12972:FEFD:FCFB").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV4, 1, 2}));                  // RFC4380
+    BOOST_CHECK(ResolveIP("2001:470:abcd:12972:12972:12972:12972:12972").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV6, 32, 1, 4, 112, 175})); // he.net
+    BOOST_CHECK(ResolveIP("2001:2001:12972:12972:12972:12972:12972:12972").GetGroup(asmap) == std::vector<unsigned char>({(unsigned char)NET_IPV6, 32, 1, 32, 1}));     // IPv6
 
     // baz.net sha256 hash: 12929400eb4607c4ac075f087167e75286b179c693eb059a01774b864e8fe505
     std::vector<unsigned char> internal_group = {NET_INTERNAL, 0x12, 0x92, 0x94, 0x00, 0xeb, 0x46, 0x07, 0xc4, 0xac, 0x07};
@@ -337,23 +334,21 @@ BOOST_AUTO_TEST_CASE(netbase_getgroup)
 // Since CNetAddr (un)ser is tested separately in net_tests.cpp here we only
 // try a few edge cases for port, service flags and time.
 
-static const std::vector<CAddress> fixture_addresses({
-    CAddress(
-        CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0 /* port */),
-        NODE_NONE,
-        0x4966bc61U /* Fri Jan  9 02:54:25 UTC 2009 */
-    ),
-    CAddress(
-        CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0x00f1 /* port */),
-        NODE_NETWORK,
-        0x83766279U /* Tue Nov 22 11:22:33 UTC 2039 */
-    ),
-    CAddress(
-        CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0xf1f2 /* port */),
-        static_cast<ServiceFlags>(NODE_NETWORK_LIMITED),
-        0xffffffffU /* Sun Feb  7 06:28:15 UTC 2106 */
-    )
-});
+static const std::vector<CAddress> fixture_addresses({CAddress(
+                                                          CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0 /* port */),
+                                                          NODE_NONE,
+                                                          0x4966bc61U /* Fri Jan  9 02:54:25 UTC 2009 */
+                                                          ),
+                                                      CAddress(
+                                                          CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0x00f1 /* port */),
+                                                          NODE_NETWORK,
+                                                          0x83766279U /* Tue Nov 22 11:22:33 UTC 2039 */
+                                                          ),
+                                                      CAddress(
+                                                          CService(CNetAddr(in6_addr(IN6ADDR_LOOPBACK_INIT)), 0xf1f2 /* port */),
+                                                          static_cast<ServiceFlags>(NODE_NETWORK_LIMITED),
+                                                          0xffffffffU /* Sun Feb  7 06:28:15 UTC 2106 */
+                                                          )});
 
 // fixture_addresses should equal to this when serialized in V1 format.
 // When this is unserialized from V1 format it should equal to fixture_addresses.

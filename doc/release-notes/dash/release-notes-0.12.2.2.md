@@ -1,23 +1,19 @@
-Dash Core version 0.12.2.2
-==========================
+# Dash Core version 0.12.2.2
 
 Release is now available from:
 
-  <https://www.dash.org/downloads/#wallets>
+<https://www.dash.org/downloads/#wallets>
 
 This is a new minor version release, bringing various bugfixes and other
 improvements.
 
 Please report bugs using the issue tracker at github:
 
-  <https://github.com/dashpay/dash/issues>
+<https://github.com/dashpay/dash/issues>
 
+# Upgrading and downgrading
 
-Upgrading and downgrading
-=========================
-
-How to Upgrade
---------------
+## How to Upgrade
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the
@@ -26,8 +22,7 @@ dashd/dash-qt (on Linux). Because of the per-UTXO fix (see below) there is a
 one-time database upgrade operation, so expect a slightly longer startup time on
 the first run.
 
-Downgrade warning
------------------
+## Downgrade warning
 
 ### Downgrade to a version < 0.12.2.2
 
@@ -38,12 +33,9 @@ previous version.
 
 This does not affect wallet forward or backward compatibility.
 
+# Notable changes
 
-Notable changes
-===============
-
-Per-UTXO fix
-------------
+## Per-UTXO fix
 
 This fixes a potential vulnerability, so called 'Corebleed', which was
 demonstrated this summer at the Вrеаkіng Віtсоіn Соnfеrеnсе іn Раrіs. The DoS
@@ -55,41 +47,35 @@ To fix this issue in Dash Core however, we had to backport a lot of other
 improvements from Bitcoin Core, see full list of backports in the detailed
 change log below.
 
-Additional indexes fix
-----------------------
+## Additional indexes fix
 
 If you were using additional indexes like `addressindex`, `spentindex` or
 `timestampindex` it's possible that they are not accurate. Please consider
 reindexing the database by starting your node with `-reindex` command line
 option. This is a one-time operation, the issue should be fixed now.
 
-InstantSend fix
----------------
+## InstantSend fix
 
 InstantSend should work with multisig addresses now.
 
-PrivateSend fix
----------------
+## PrivateSend fix
 
 Some internal data structures were not cleared properly, which could lead
 to a slightly higher memory consumption over a long period of time. This was
 a minor issue which was not affecting mixing speed or user privacy in any way.
 
-Removal of support for local masternodes
-----------------------------------------
+## Removal of support for local masternodes
 
 Keeping a wallet with 1000 DASH unlocked for 24/7 is definitely not a good idea
 anymore. Because of this fact, it's also no longer reasonable to update and test
 this feature, so it's completely removed now. If for some reason you were still
 using it, please follow one of the guides and setup a remote masternode instead.
 
-Dropping old (pre-12.2) peers
------------------------------
+## Dropping old (pre-12.2) peers
 
 Connections from peers with protocol lower than 70208 are no longer accepted.
 
-Other improvements and bug fixes
---------------------------------
+## Other improvements and bug fixes
 
 As a result of previous intensive refactoring and some additional fixes,
 it should be possible to compile Dash Core with `--disable-wallet` option now.
@@ -100,13 +86,12 @@ which `getblocktemplate` rpc becomes available on node start.
 And as usual, various small bugs and typos were fixed and more refactoring was
 done too.
 
-
-0.12.2.2 Change log
-===================
+# 0.12.2.2 Change log
 
 See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...dashpay:v0.12.2.2) below.
 
 ### Backports:
+
 - [`996f5103a`](https://github.com/dashpay/dash/commit/996f5103a) Backport #7056: Save last db read
 - [`23fe35a18`](https://github.com/dashpay/dash/commit/23fe35a18) Backport #7756: Add cursor to iterate over utxo set, use this in `gettxoutsetinfo`
 - [`17f2ea5d7`](https://github.com/dashpay/dash/commit/17f2ea5d7) Backport #7904: txdb: Fix assert crash in new UTXO set cursor
@@ -128,7 +113,7 @@ See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...da
 - [`09b3e042f`](https://github.com/dashpay/dash/commit/09b3e042f) Backport #9310: Assert FRESH validity in CCoinsViewCache::BatchWrite
 - [`ceb64fcd4`](https://github.com/dashpay/dash/commit/ceb64fcd4) Backport #8610: Share unused mempool memory with coincache
 - [`817ecc03d`](https://github.com/dashpay/dash/commit/817ecc03d) Backport #9353: Add data() method to CDataStream (and use it)
-- [`249db2776`](https://github.com/dashpay/dash/commit/249db2776) Backport #9999: [LevelDB] Plug leveldb logs to bitcoin logs
+- [`249db2776`](https://github.com/dashpay/dash/commit/249db2776) Backport #12972: [LevelDB] Plug leveldb logs to bitcoin logs
 - [`cfefd34f4`](https://github.com/dashpay/dash/commit/cfefd34f4) Backport #10126: Compensate for memory peak at flush time
 - [`ff9b2967a`](https://github.com/dashpay/dash/commit/ff9b2967a) Backport #10133: Clean up calculations of pcoinsTip memory usage
 - [`567043d36`](https://github.com/dashpay/dash/commit/567043d36) Make DisconnectBlock and ConnectBlock static in validation.cpp
@@ -156,21 +141,26 @@ See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...da
 - [`fee05dab9`](https://github.com/dashpay/dash/commit/fee05dab9) build: silence gcc7's implicit fallthrough warning
 
 ### Masternodes:
+
 - [`312663b4b`](https://github.com/dashpay/dash/commit/312663b4b) Remove support for local masternodes (#1706)
 
 ### PrivateSend:
+
 - [`7e96af4e6`](https://github.com/dashpay/dash/commit/7e96af4e6) Refactor PrivateSend (#1735)
 - [`f4502099a`](https://github.com/dashpay/dash/commit/f4502099a) make CheckDSTXes() private, execute it on both client and server (#1736)
 
 ### InstantSend:
+
 - [`4802a1fb7`](https://github.com/dashpay/dash/commit/4802a1fb7) Allow IS for all txes, not only for txes with p2pkh and data outputs (#1760)
 - [`f37a64208`](https://github.com/dashpay/dash/commit/f37a64208) InstantSend txes should never qualify to be a 0-fee txes (#1777)
 
 ### DIP0001:
+
 - [`3028af19f`](https://github.com/dashpay/dash/commit/3028af19f) post-DIP0001 cleanup (#1763)
 - [`51b2c7501`](https://github.com/dashpay/dash/commit/51b2c7501) Fix WarningBitsConditionChecker (#1765)
 
 ### Network/Sync:
+
 - [`5d58dd90c`](https://github.com/dashpay/dash/commit/5d58dd90c) Make sure to clear setAskFor in Dash submodules (#1730)
 - [`328009749`](https://github.com/dashpay/dash/commit/328009749) fine-tune sync conditions in getblocktemplate (#1739)
 - [`362becbcc`](https://github.com/dashpay/dash/commit/362becbcc) Bump MIN_PEER_PROTO_VERSION to 70208 (#1772)
@@ -179,16 +169,19 @@ See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...da
 - [`a79c97248`](https://github.com/dashpay/dash/commit/a79c97248) Fix ProcessVerifyBroadcast (#1780)
 
 ### Build:
+
 - [`c166ed39b`](https://github.com/dashpay/dash/commit/c166ed39b) Allow compilation with `--disable-wallet` (#1733)
 - [`31bc9d4ee`](https://github.com/dashpay/dash/commit/31bc9d4ee) Show test progress for tests running in wine to avoid Travis timeout (#1740)
 - [`32f21698e`](https://github.com/dashpay/dash/commit/32f21698e) Adjust tests to avoid Travis timeouts (#1745)
 - [`837c4fc5d`](https://github.com/dashpay/dash/commit/837c4fc5d) Force rcc to use resource format version 1. (#1784)
 
 ### GUI:
+
 - [`70cb2a4af`](https://github.com/dashpay/dash/commit/70cb2a4af) Fix traditional UI theme (#1741)
 - [`e975f891c`](https://github.com/dashpay/dash/commit/e975f891c) Fix ru typo (#1742)
 
 ### Docs:
+
 - [`bc8342558`](https://github.com/dashpay/dash/commit/bc8342558) Two small fixes in docs (#1746)
 - [`9e7cc56cb`](https://github.com/dashpay/dash/commit/9e7cc56cb) Fix typo in release-notes.md (#1759)
 - [`3f3705c47`](https://github.com/dashpay/dash/commit/3f3705c47) [Trivial] Typo/doc updates and RPC help formatting (#1758)
@@ -197,6 +190,7 @@ See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...da
 - [`0291604ad`](https://github.com/dashpay/dash/commit/0291604ad) Clarify usage of pointers and references in code (#1778)
 
 ### Other:
+
 - [`ccbd5273e`](https://github.com/dashpay/dash/commit/ccbd5273e) bump to 0.12.3.0 (#1726)
 - [`865b61b50`](https://github.com/dashpay/dash/commit/865b61b50) Unify GetNextWorkRequired (#1737)
 - [`d1aeac1b2`](https://github.com/dashpay/dash/commit/d1aeac1b2) Spelling mistake in validation.cpp (#1752)
@@ -204,11 +198,9 @@ See detailed [change log](https://github.com/dashpay/dash/compare/v0.12.2.1...da
 - [`c5ec2f82a`](https://github.com/dashpay/dash/commit/c5ec2f82a) Drop `IsNormalPaymentScript`, use `IsPayToPublicKeyHash` (#1761)
 - [`f9f28e7c7`](https://github.com/dashpay/dash/commit/f9f28e7c7) De-bump to 0.12.2.2 (#1768)
 - [`54186a159`](https://github.com/dashpay/dash/commit/54186a159) Make sure additional indexes are recalculated correctly in VerifyDB (#1773)
-- [`86e6f0dd2`](https://github.com/dashpay/dash/commit/86e6f0dd2) Fix CMasternodeMan::ProcessVerify* logs (#1782)
+- [`86e6f0dd2`](https://github.com/dashpay/dash/commit/86e6f0dd2) Fix CMasternodeMan::ProcessVerify\* logs (#1782)
 
-
-Credits
-=======
+# Credits
 
 Thanks to everyone who directly contributed to this release:
 
@@ -225,9 +217,7 @@ As well as Bitcoin Core Developers and everyone that submitted issues,
 reviewed pull requests or helped translating on
 [Transifex](https://www.transifex.com/projects/p/dash/).
 
-
-Older releases
-==============
+# Older releases
 
 Dash was previously known as Darkcoin.
 
@@ -257,4 +247,3 @@ These release are considered obsolete. Old release notes can be found here:
 - [v0.11.0](release-notes/dash/release-notes-0.11.0.md) released Jan/15/2015
 - [v0.10.x](release-notes/dash/release-notes-0.10.0.md) released Sep/25/2014
 - [v0.9.x](release-notes/dash/release-notes-0.9.0.md) released Mar/13/2014
-

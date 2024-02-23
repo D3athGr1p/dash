@@ -3,31 +3,30 @@ services:
   container:
     entrypoint: /bin/bash
     build:
-      context: '..'
-      dockerfile: './develop/Dockerfile'
-    tty: true         # Equivalent to -t
-    stdin_open: true  # Equivalent to -i
+      context: ".."
+      dockerfile: "./develop/Dockerfile"
+    tty: true # Equivalent to -t
+    stdin_open: true # Equivalent to -i
     ports:
-      - "9998:9998"           # Mainnet Ports
-      - "9999:9999"
-      - "19998:19998"         # Testnet Ports
+      - "12971:12971" # Mainnet Ports
+      - "12972:12972"
+      - "19998:19998" # Testnet Ports
       - "19999:19999"
 
-# A note about volumes:
-#
-# If Docker is interacting with your operating system directly
-# without an intermediate VM, then you do not need to change anything
-#
-# But if not, then you'll need to mount your system's root directory
-# (i.e. /) into the boot2docker instance if you want to mirror the exact
-# filesystem structure of your host.
-#
+    # A note about volumes:
+    #
+    # If Docker is interacting with your operating system directly
+    # without an intermediate VM, then you do not need to change anything
+    #
+    # But if not, then you'll need to mount your system's root directory
+    # (i.e. /) into the boot2docker instance if you want to mirror the exact
+    # filesystem structure of your host.
+    #
     volumes:
       - type: bind
-#        source: /host/$PWD # Workaround needed on non-Linux hosts
+        #        source: /host/$PWD # Workaround needed on non-Linux hosts
         source: ../../..
         target: /src/dash
-
 # Sharing your ccache
 #
 # As the container is supposed to be a reproducible replica of the build

@@ -22,7 +22,7 @@ private:
 
 public:
     explicit CAddrManTest(bool makeDeterministic = true,
-        std::vector<bool> asmap = std::vector<bool>())
+                          std::vector<bool> asmap = std::vector<bool>())
     {
         if (makeDeterministic) {
             //  Set addrman addr placement to be deterministic.
@@ -75,14 +75,14 @@ public:
     // Simulates connection failure so that we can test eviction of offline nodes
     void SimConnFail(const CService& addr)
     {
-         int64_t nLastSuccess = 1;
-         // Set last good connection in the deep past.
-         Good(addr, true, nLastSuccess);
+        int64_t nLastSuccess = 1;
+        // Set last good connection in the deep past.
+        Good(addr, true, nLastSuccess);
 
-         bool count_failure = false;
-         int64_t nLastTry = GetAdjustedTime()-61;
-         Attempt(addr, count_failure, nLastTry);
-     }
+        bool count_failure = false;
+        int64_t nLastTry = GetAdjustedTime() - 61;
+        Attempt(addr, count_failure, nLastTry);
+    }
 
     void Clear()
     {
@@ -92,7 +92,6 @@ public:
             insecure_rand = FastRandomContext(true);
         }
     }
-
 };
 
 static CNetAddr ResolveIP(const std::string& ip)
@@ -110,7 +109,8 @@ static CService ResolveService(const std::string& ip, uint16_t port = 0)
 }
 
 
-static std::vector<bool> FromBytes(const unsigned char* source, int vector_size) {
+static std::vector<bool> FromBytes(const unsigned char* source, int vector_size)
+{
     std::vector<bool> result(vector_size);
     for (int byte_i = 0; byte_i < vector_size / 8; ++byte_i) {
         unsigned char cur_byte = source[byte_i];
@@ -231,8 +231,8 @@ BOOST_AUTO_TEST_CASE(addrman_select)
 
     // Add three addresses to new table.
     CService addr2 = ResolveService("250.3.1.1", 8333);
-    CService addr3 = ResolveService("250.3.2.2", 9999);
-    CService addr4 = ResolveService("250.3.3.3", 9999);
+    CService addr3 = ResolveService("250.3.2.2", 12972);
+    CService addr4 = ResolveService("250.3.3.3", 12972);
 
     BOOST_CHECK(addrman.Add(CAddress(addr2, NODE_NONE), ResolveService("250.3.1.1", 8333)));
     BOOST_CHECK(addrman.Add(CAddress(addr3, NODE_NONE), ResolveService("250.3.1.1", 8333)));
@@ -273,11 +273,11 @@ BOOST_AUTO_TEST_CASE(addrman_new_collisions)
         CService addr = ResolveService("250.1.1." + ToString(i));
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
 
-        //Test: No collision in new table yet.
+        // Test: No collision in new table yet.
         BOOST_CHECK_EQUAL(addrman.size(), i);
     }
 
-    //Test: new table collision!
+    // Test: new table collision!
     CService addr1 = ResolveService("250.1.1.18");
     BOOST_CHECK(addrman.Add(CAddress(addr1, NODE_NONE), source));
     BOOST_CHECK_EQUAL(addrman.size(), 17U);
@@ -300,11 +300,11 @@ BOOST_AUTO_TEST_CASE(addrman_tried_collisions)
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
         addrman.Good(CAddress(addr, NODE_NONE));
 
-        //Test: No collision in tried table yet.
+        // Test: No collision in tried table yet.
         BOOST_CHECK_EQUAL(addrman.size(), i);
     }
 
-    //Test: tried table collision!
+    // Test: tried table collision!
     CService addr1 = ResolveService("250.1.1.80");
     BOOST_CHECK(addrman.Add(CAddress(addr1, NODE_NONE), source));
     BOOST_CHECK_EQUAL(addrman.size(), 79U);
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE(addrman_find)
     BOOST_CHECK_EQUAL(addrman.size(), 0U);
 
     CAddress addr1 = CAddress(ResolveService("250.1.2.1", 8333), NODE_NONE);
-    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 12972), NODE_NONE);
     CAddress addr3 = CAddress(ResolveService("251.255.2.1", 8333), NODE_NONE);
 
     CNetAddr source1 = ResolveIP("250.1.2.1");
@@ -399,7 +399,7 @@ BOOST_AUTO_TEST_CASE(addrman_getaddr)
 
     CAddress addr1 = CAddress(ResolveService("250.250.2.1", 8333), NODE_NONE);
     addr1.nTime = GetAdjustedTime(); // Set time so isTerrible = false
-    CAddress addr2 = CAddress(ResolveService("250.251.2.2", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.251.2.2", 12972), NODE_NONE);
     addr2.nTime = GetAdjustedTime();
     CAddress addr3 = CAddress(ResolveService("251.252.2.3", 8333), NODE_NONE);
     addr3.nTime = GetAdjustedTime();
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_tried_bucket_legacy)
     CAddrManTest addrman;
 
     CAddress addr1 = CAddress(ResolveService("250.1.1.1", 8333), NODE_NONE);
-    CAddress addr2 = CAddress(ResolveService("250.1.1.1", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.1.1.1", 12972), NODE_NONE);
 
     CNetAddr source1 = ResolveIP("250.1.1.1");
 
@@ -510,7 +510,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_new_bucket_legacy)
     CAddrManTest addrman;
 
     CAddress addr1 = CAddress(ResolveService("250.1.2.1", 8333), NODE_NONE);
-    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 12972), NODE_NONE);
 
     CNetAddr source1 = ResolveIP("250.1.2.1");
 
@@ -550,8 +550,9 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_new_bucket_legacy)
     for (int j = 0; j < 4 * 255; j++) {
         CAddrInfo infoj = CAddrInfo(CAddress(
                                         ResolveService(
-                                            ToString(250 + (j / 255)) + "." + ToString(j % 256) + ".1.1"), NODE_NONE),
-            ResolveIP("251.4.1.1"));
+                                            ToString(250 + (j / 255)) + "." + ToString(j % 256) + ".1.1"),
+                                        NODE_NONE),
+                                    ResolveIP("251.4.1.1"));
         int bucket = infoj.GetNewBucket(nKey1, asmap);
         buckets.insert(bucket);
     }
@@ -588,7 +589,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_tried_bucket)
     CAddrManTest addrman;
 
     CAddress addr1 = CAddress(ResolveService("250.1.1.1", 8333), NODE_NONE);
-    CAddress addr2 = CAddress(ResolveService("250.1.1.1", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.1.1.1", 12972), NODE_NONE);
 
     CNetAddr source1 = ResolveIP("250.1.1.1");
 
@@ -643,7 +644,7 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_new_bucket)
     CAddrManTest addrman;
 
     CAddress addr1 = CAddress(ResolveService("250.1.2.1", 8333), NODE_NONE);
-    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 9999), NODE_NONE);
+    CAddress addr2 = CAddress(ResolveService("250.1.2.1", 12972), NODE_NONE);
 
     CNetAddr source1 = ResolveIP("250.1.2.1");
 
@@ -683,8 +684,9 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_new_bucket)
     for (int j = 0; j < 4 * 255; j++) {
         CAddrInfo infoj = CAddrInfo(CAddress(
                                         ResolveService(
-                                            ToString(250 + (j / 255)) + "." + ToString(j % 256) + ".1.1"), NODE_NONE),
-            ResolveIP("251.4.1.1"));
+                                            ToString(250 + (j / 255)) + "." + ToString(j % 256) + ".1.1"),
+                                        NODE_NONE),
+                                    ResolveIP("251.4.1.1"));
         int bucket = infoj.GetNewBucket(nKey1, asmap);
         buckets.insert(bucket);
     }
@@ -715,7 +717,6 @@ BOOST_AUTO_TEST_CASE(caddrinfo_get_new_bucket)
     // Test: IP addresses in the different source /16 prefixes sometimes map to NO MORE
     // than 1 bucket.
     BOOST_CHECK(buckets.size() == 1);
-
 }
 
 BOOST_AUTO_TEST_CASE(addrman_serialization)
@@ -837,7 +838,7 @@ BOOST_AUTO_TEST_CASE(addrman_selecttriedcollision)
     // Add twenty two addresses.
     CNetAddr source = ResolveIP("252.2.2.2");
     for (unsigned int i = 1; i < 23; i++) {
-        CService addr = ResolveService("250.1.1."+ToString(i));
+        CService addr = ResolveService("250.1.1." + ToString(i));
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
         addrman.Good(addr);
 
@@ -848,13 +849,12 @@ BOOST_AUTO_TEST_CASE(addrman_selecttriedcollision)
 
     // Ensure Good handles duplicates well.
     for (unsigned int i = 1; i < 23; i++) {
-        CService addr = ResolveService("250.1.1."+ToString(i));
+        CService addr = ResolveService("250.1.1." + ToString(i));
         addrman.Good(addr);
 
         BOOST_CHECK(addrman.size() == 22);
         BOOST_CHECK(addrman.SelectTriedCollision().ToString() == "[::]:0");
     }
-
 }
 
 BOOST_AUTO_TEST_CASE(addrman_noevict)
@@ -864,7 +864,7 @@ BOOST_AUTO_TEST_CASE(addrman_noevict)
     // Add twenty two addresses.
     CNetAddr source = ResolveIP("252.2.2.2");
     for (unsigned int i = 1; i < 23; i++) {
-        CService addr = ResolveService("250.1.1."+ToString(i));
+        CService addr = ResolveService("250.1.1." + ToString(i));
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
         addrman.Good(addr);
 
@@ -887,7 +887,7 @@ BOOST_AUTO_TEST_CASE(addrman_noevict)
 
     // Lets create two collisions.
     for (unsigned int i = 24; i < 33; i++) {
-        CService addr = ResolveService("250.1.1."+ToString(i));
+        CService addr = ResolveService("250.1.1." + ToString(i));
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
         addrman.Good(addr);
 
@@ -925,7 +925,7 @@ BOOST_AUTO_TEST_CASE(addrman_evictionworks)
     // Add twenty two addresses.
     CNetAddr source = ResolveIP("252.2.2.2");
     for (unsigned int i = 1; i < 23; i++) {
-        CService addr = ResolveService("250.1.1."+ToString(i));
+        CService addr = ResolveService("250.1.1." + ToString(i));
         BOOST_CHECK(addrman.Add(CAddress(addr, NODE_NONE), source));
         addrman.Good(addr);
 

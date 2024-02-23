@@ -107,10 +107,10 @@ BOOST_AUTO_TEST_CASE(caddrdb_read)
 
     CService addr1, addr2, addr3;
     BOOST_CHECK(Lookup("250.7.1.1", addr1, 8333, false));
-    BOOST_CHECK(Lookup("250.7.2.2", addr2, 9999, false));
-    BOOST_CHECK(Lookup("250.7.3.3", addr3, 9999, false));
-    BOOST_CHECK(Lookup("250.7.3.3"s, addr3, 9999, false));
-    BOOST_CHECK(!Lookup("250.7.3.3\0example.com"s, addr3, 9999, false));
+    BOOST_CHECK(Lookup("250.7.2.2", addr2, 12972, false));
+    BOOST_CHECK(Lookup("250.7.3.3", addr3, 12972, false));
+    BOOST_CHECK(Lookup("250.7.3.3"s, addr3, 12972, false));
+    BOOST_CHECK(!Lookup("250.7.3.3\0example.com"s, addr3, 12972, false));
 
     // Add three addresses to new table.
     CService source;
@@ -524,8 +524,7 @@ BOOST_AUTO_TEST_CASE(cnetaddr_unserialize_v2)
     s << Span{ParseHex("04"                               // network type (TORv3)
                        "20"                               // address length
                        "79bcc625184b05194975c28b66b66b04" // address
-                       "69f7f6556fb1ac3189a79b40dda32f1f"
-                       )};
+                       "69f7f6556fb1ac3189a79b40dda32f1f")};
     s >> addr;
     BOOST_CHECK(addr.IsValid());
     BOOST_CHECK(addr.IsTor());

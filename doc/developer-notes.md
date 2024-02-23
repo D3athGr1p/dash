@@ -1,55 +1,54 @@
-Developer Notes
-===============
+# Developer Notes
 
 <!-- markdown-toc start -->
+
 **Table of Contents**
 
 - [Developer Notes](#developer-notes)
-    - [Coding Style (General)](#coding-style-general)
-    - [Coding Style (C++)](#coding-style-c)
-    - [Coding Style (Python)](#coding-style-python)
-    - [Coding Style (Doxygen-compatible comments)](#coding-style-doxygen-compatible-comments)
-      - [Generating Documentation](#generating-documentation)
-    - [Development tips and tricks](#development-tips-and-tricks)
-        - [Compiling for debugging](#compiling-for-debugging)
-        - [Show sources in debugging](#show-sources-in-debugging)
-        - [Compiling for gprof profiling](#compiling-for-gprof-profiling)
-        - [`debug.log`](#debuglog)
-        - [Testnet and Regtest modes](#testnet-and-regtest-modes)
-        - [DEBUG_LOCKORDER](#debug_lockorder)
-        - [Valgrind suppressions file](#valgrind-suppressions-file)
-        - [Compiling for test coverage](#compiling-for-test-coverage)
-        - [Performance profiling with perf](#performance-profiling-with-perf)
-        - [Sanitizers](#sanitizers)
-    - [Locking/mutex usage notes](#lockingmutex-usage-notes)
-    - [Threads](#threads)
-    - [Ignoring IDE/editor files](#ignoring-ideeditor-files)
+  - [Coding Style (General)](#coding-style-general)
+  - [Coding Style (C++)](#coding-style-c)
+  - [Coding Style (Python)](#coding-style-python)
+  - [Coding Style (Doxygen-compatible comments)](#coding-style-doxygen-compatible-comments)
+    - [Generating Documentation](#generating-documentation)
+  - [Development tips and tricks](#development-tips-and-tricks)
+    - [Compiling for debugging](#compiling-for-debugging)
+    - [Show sources in debugging](#show-sources-in-debugging)
+    - [Compiling for gprof profiling](#compiling-for-gprof-profiling)
+    - [`debug.log`](#debuglog)
+    - [Testnet and Regtest modes](#testnet-and-regtest-modes)
+    - [DEBUG_LOCKORDER](#debug_lockorder)
+    - [Valgrind suppressions file](#valgrind-suppressions-file)
+    - [Compiling for test coverage](#compiling-for-test-coverage)
+    - [Performance profiling with perf](#performance-profiling-with-perf)
+    - [Sanitizers](#sanitizers)
+  - [Locking/mutex usage notes](#lockingmutex-usage-notes)
+  - [Threads](#threads)
+  - [Ignoring IDE/editor files](#ignoring-ideeditor-files)
 - [Development guidelines](#development-guidelines)
-    - [General Dash Core](#general-dash-core)
-    - [Wallet](#wallet)
-    - [General C++](#general-c)
-    - [C++ data structures](#c-data-structures)
-    - [Strings and formatting](#strings-and-formatting)
-    - [Shadowing](#shadowing)
-    - [Threads and synchronization](#threads-and-synchronization)
-    - [Scripts](#scripts)
-        - [Shebang](#shebang)
-    - [Source code organization](#source-code-organization)
-    - [GUI](#gui)
-    - [Subtrees](#subtrees)
-    - [Upgrading LevelDB](#upgrading-leveldb)
-      - [File Descriptor Counts](#file-descriptor-counts)
-      - [Consensus Compatibility](#consensus-compatibility)
-    - [Scripted diffs](#scripted-diffs)
-        - [Suggestions and examples](#suggestions-and-examples)
-    - [Release notes](#release-notes)
-    - [RPC interface guidelines](#rpc-interface-guidelines)
-    - [Internal interface guidelines](#internal-interface-guidelines)
+  - [General Dash Core](#general-dash-core)
+  - [Wallet](#wallet)
+  - [General C++](#general-c)
+  - [C++ data structures](#c-data-structures)
+  - [Strings and formatting](#strings-and-formatting)
+  - [Shadowing](#shadowing)
+  - [Threads and synchronization](#threads-and-synchronization)
+  - [Scripts](#scripts)
+    - [Shebang](#shebang)
+  - [Source code organization](#source-code-organization)
+  - [GUI](#gui)
+  - [Subtrees](#subtrees)
+  - [Upgrading LevelDB](#upgrading-leveldb)
+    - [File Descriptor Counts](#file-descriptor-counts)
+    - [Consensus Compatibility](#consensus-compatibility)
+  - [Scripted diffs](#scripted-diffs)
+    - [Suggestions and examples](#suggestions-and-examples)
+  - [Release notes](#release-notes)
+  - [RPC interface guidelines](#rpc-interface-guidelines)
+  - [Internal interface guidelines](#internal-interface-guidelines)
 
 <!-- markdown-toc end -->
 
-Coding Style (General)
-----------------------
+## Coding Style (General)
 
 Various coding styles have been used during the history of the codebase,
 and the result is not very consistent. However, we're now trying to converge to
@@ -59,13 +58,13 @@ commits.
 
 Do not submit patches solely to modify the style of existing code.
 
-Coding Style (C++)
-------------------
+## Coding Style (C++)
 
 - **Indentation and whitespace rules** as specified in
-[src/.clang-format](/src/.clang-format). You can use the provided
-[clang-format-diff script](/contrib/devtools/README.md#clang-format-diffpy)
-tool to clean up patches automatically before submission.
+  [src/.clang-format](/src/.clang-format). You can use the provided
+  [clang-format-diff script](/contrib/devtools/README.md#clang-format-diffpy)
+  tool to clean up patches automatically before submission.
+
   - Braces on new lines for classes, functions, methods.
   - Braces on the same line for everything else.
   - 4 space indentation (no tabs) for every block except namespaces.
@@ -83,8 +82,9 @@ tool to clean up patches automatically before submission.
     style option.
 
 - **Symbol naming conventions**. These are preferred in new code, but are not
-required when doing so would need changes to significant pieces of existing
-code.
+  required when doing so would need changes to significant pieces of existing
+  code.
+
   - Variable (including function arguments) and namespace names are all lowercase and may use `_` to
     separate words (snake_case).
     - Class member variables have a `m_` prefix.
@@ -93,7 +93,7 @@ code.
   - Enumerator constants may be `snake_case`, `PascalCase` or `ALL_CAPS`.
     This is a more tolerant policy than the [C++ Core
     Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#Renum-caps),
-    which recommend using `snake_case`.  Please use what seems appropriate.
+    which recommend using `snake_case`. Please use what seems appropriate.
   - Class names, function names, and method names are UpperCamelCase
     (PascalCase). Do not prefix class names with `C`.
   - Test suite naming convention: The Boost test suite in file
@@ -107,6 +107,7 @@ code.
   - Align pointers and references to the left i.e. use `type& var` and not `type &var`.
 
 Block style example:
+
 ```c++
 int g_count = 0;
 
@@ -138,13 +139,11 @@ public:
 } // namespace foo
 ```
 
-Coding Style (Python)
----------------------
+## Coding Style (Python)
 
 Refer to [/test/functional/README.md#style-guidelines](/test/functional/README.md#style-guidelines).
 
-Coding Style (Doxygen-compatible comments)
-------------------------------------------
+## Coding Style (Doxygen-compatible comments)
 
 Dash Core uses [Doxygen](http://www.doxygen.nl/) to generate its official documentation.
 
@@ -169,9 +168,10 @@ bool function(int arg1, const char *arg2, std::string& arg3)
 
 A complete list of `@xxx` commands can be found at http://www.stack.nl/~dimitri/doxygen/manual/commands.html.
 As Doxygen recognizes the comments by the delimiters (`/**` and `*/` in this case), you don't
-*need* to provide any commands for a comment to be valid; just a description text is fine.
+_need_ to provide any commands for a comment to be valid; just a description text is fine.
 
 To describe a class, use the same construct above the class definition:
+
 ```c++
 /**
  * Alerts are for notifying old versions if they become too obsolete and
@@ -182,17 +182,20 @@ class CAlert
 ```
 
 To describe a member or variable use:
+
 ```c++
 //! Description before the member
 int var;
 ```
 
 or
+
 ```c++
 int var; //!< Description after the member
 ```
 
 Also OK:
+
 ```c++
 ///
 /// ... Description ...
@@ -201,6 +204,7 @@ bool function2(int arg1, const char *arg2)
 ```
 
 Not picked up by Doxygen:
+
 ```c++
 //
 // ... Description ...
@@ -240,8 +244,7 @@ Linux: `sudo apt install doxygen graphviz`
 
 MacOS: `brew install doxygen graphviz`
 
-Development tips and tricks
----------------------------
+## Development tips and tricks
 
 ### Compiling for debugging
 
@@ -261,16 +264,19 @@ There are a few possible fixes:
 1. Configure source file mapping.
 
 For `gdb` create or append to `.gdbinit` file:
+
 ```
 set substitute-path ./src /path/to/project/root/src
 ```
 
 For `lldb` create or append to `.lldbinit` file:
+
 ```
 settings set target.source-map ./src /path/to/project/root/src
 ```
 
 2. Add a symlink to the `./src` directory:
+
 ```
 ln -s /path/to/project/root/src src
 ```
@@ -315,26 +321,26 @@ The util file `src/util/check.h` offers helpers to protect against coding and
 internal logic bugs. They must never be used to validate user, network or any
 other input.
 
-* `assert` or `Assert` should be used to document assumptions when any
+- `assert` or `Assert` should be used to document assumptions when any
   violation would mean that it is not safe to continue program execution. The
   code is always compiled with assertions enabled.
-   - For example, a nullptr dereference or any other logic bug in validation
-     code means the program code is faulty and must terminate immediately.
-* `CHECK_NONFATAL` should be used for recoverable internal logic bugs. On
+  - For example, a nullptr dereference or any other logic bug in validation
+    code means the program code is faulty and must terminate immediately.
+- `CHECK_NONFATAL` should be used for recoverable internal logic bugs. On
   failure, it will throw an exception, which can be caught to recover from the
   error.
-   - For example, a nullptr dereference or any other logic bug in RPC code
-     means that the RPC code is faulty and can not be executed. However, the
-     logic bug can be shown to the user and the program can continue to run.
-* `Assume` should be used to document assumptions when program execution can
+  - For example, a nullptr dereference or any other logic bug in RPC code
+    means that the RPC code is faulty and can not be executed. However, the
+    logic bug can be shown to the user and the program can continue to run.
+- `Assume` should be used to document assumptions when program execution can
   safely continue even if the assumption is violated. In debug builds it
   behaves like `Assert`/`assert` to notify developers and testers about
   nonfatal errors. In production it doesn't warn or log anything, though the
   expression is always evaluated.
-   - For example it can be assumed that a variable is only initialized once,
-     but a failed assumption does not result in a fatal bug. A failed
-     assumption may or may not result in a slightly degraded user experience,
-     but it is safe to continue program execution.
+  - For example it can be assumed that a variable is only initialized once,
+    but a failed assumption does not result in a fatal bug. A failed
+    assumption may or may not result in a slightly degraded user experience,
+    but it is safe to continue program execution.
 
 ### Valgrind suppressions file
 
@@ -411,7 +417,6 @@ or using a graphical tool like [Hotspot](https://github.com/KDAB/hotspot).
 
 See the functional test documentation for how to invoke perf within tests.
 
-
 ### Sanitizers
 
 Dash Core can be compiled with various "sanitizers" enabled, which add
@@ -454,17 +459,16 @@ compiler.
 
 Additional resources:
 
- * [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
- * [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html)
- * [MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html)
- * [ThreadSanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html)
- * [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
- * [GCC Instrumentation Options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)
- * [Google Sanitizers Wiki](https://github.com/google/sanitizers/wiki)
- * [Issue #12691: Enable -fsanitize flags in Travis](https://github.com/bitcoin/bitcoin/issues/12691)
+- [AddressSanitizer](https://clang.llvm.org/docs/AddressSanitizer.html)
+- [LeakSanitizer](https://clang.llvm.org/docs/LeakSanitizer.html)
+- [MemorySanitizer](https://clang.llvm.org/docs/MemorySanitizer.html)
+- [ThreadSanitizer](https://clang.llvm.org/docs/ThreadSanitizer.html)
+- [UndefinedBehaviorSanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
+- [GCC Instrumentation Options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)
+- [Google Sanitizers Wiki](https://github.com/google/sanitizers/wiki)
+- [Issue #12691: Enable -fsanitize flags in Travis](https://github.com/bitcoin/bitcoin/issues/12691)
 
-Locking/mutex usage notes
--------------------------
+## Locking/mutex usage notes
 
 The code is multi-threaded and uses mutexes and the
 `LOCK` and `TRY_LOCK` macros to protect data structures.
@@ -480,8 +484,7 @@ between the various components is a goal, with any necessary locking
 done by the components (e.g. see the self-contained `FillableSigningProvider` class
 and its `cs_KeyStore` lock for example).
 
-Threads
--------
+## Threads
 
 - [Main thread (`dashd`)](https://doxygen.bitcoincore.org/bitcoind_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97)
   : Started from `main()` in `bitcoind.cpp`. Responsible for starting up and
@@ -522,7 +525,7 @@ Threads
     : Universal plug-and-play startup/shutdown.
 
   - [ThreadSocketHandler (`d-net`)](https://doxygen.bitcoincore.org/class_c_connman.html#a765597cbfe99c083d8fa3d61bb464e34)
-    : Sends/Receives data from peers on port 9999.
+    : Sends/Receives data from peers on port 12972.
 
   - [ThreadOpenAddedConnections (`d-addcon`)](https://doxygen.bitcoincore.org/class_c_connman.html#a0b787caf95e52a346a2b31a580d60a62)
     : Opens network connections to added nodes.
@@ -539,15 +542,13 @@ Threads
   - CInstantSendManager::WorkThreadMain (`d-isman`)
     : Processes pending InstantSend locks.
 
-Thread pools
-------------
+## Thread pools
 
 - CBLSWorker : A highly parallelized worker/helper for BLS/DKG calculations.
 
 - CDKGSessionManager : A thread pool for processing LLMQ messages.
 
-Ignoring IDE/editor files
---------------------------
+## Ignoring IDE/editor files
 
 In closed-source environments in which everyone uses the same IDE, it is common
 to add temporary files it produces to the project-wide `.gitignore` file.
@@ -566,6 +567,7 @@ to do this is thus to create your local gitignore. Add this to `~/.gitconfig`:
 on a terminal)
 
 Then put your favourite tool's temporary filenames in that file, e.g.
+
 ```
 # NetBeans
 nbproject/
@@ -578,40 +580,36 @@ If a set of tools is used by the build system or scripts the repository (for
 example, lcov) it is perfectly acceptable to add its files to `.gitignore`
 and commit them.
 
-Development guidelines
-============================
+# Development guidelines
 
 A few non-style-related recommendations for developers, as well as points to
 pay attention to for reviewers of Dash Core code.
 
-General Dash Core
-----------------------
+## General Dash Core
 
 - New features should be exposed on RPC first, then can be made available in the GUI.
 
-  - *Rationale*: RPC allows for better automatic testing. The test suite for
+  - _Rationale_: RPC allows for better automatic testing. The test suite for
     the GUI is very limited.
 
 - Make sure pull requests pass Travis CI before merging.
 
-  - *Rationale*: Makes sure that they pass thorough testing, and that the tester will keep passing
-     on the master branch. Otherwise, all new pull requests will start failing the tests, resulting in
-     confusion and mayhem.
+  - _Rationale_: Makes sure that they pass thorough testing, and that the tester will keep passing
+    on the master branch. Otherwise, all new pull requests will start failing the tests, resulting in
+    confusion and mayhem.
 
-  - *Explanation*: If the test suite is to be updated for a change, this has to
+  - _Explanation_: If the test suite is to be updated for a change, this has to
     be done first.
 
-Wallet
--------
+## Wallet
 
 - Make sure that no crashes happen with run-time option `-disablewallet`.
 
 - Include `db_cxx.h` (BerkeleyDB header) only when `ENABLE_WALLET` is set.
 
-  - *Rationale*: Otherwise compilation of the disable-wallet build will fail in environments without BerkeleyDB.
+  - _Rationale_: Otherwise compilation of the disable-wallet build will fail in environments without BerkeleyDB.
 
-General C++
--------------
+## General C++
 
 For general C++ guidelines, you may refer to the [C++ Core
 Guidelines](https://isocpp.github.io/CppCoreGuidelines/).
@@ -623,39 +621,38 @@ Common misconceptions are clarified in those sections:
 
 - Assertions should not have side-effects.
 
-  - *Rationale*: Even though the source code is set to refuse to compile
+  - _Rationale_: Even though the source code is set to refuse to compile
     with assertions disabled, having side-effects in assertions is unexpected and
     makes the code harder to understand.
 
 - If you use the `.h`, you must link the `.cpp`.
 
-  - *Rationale*: Include files define the interface for the code in implementation files. Including one but
-      not linking the other is confusing. Please avoid that. Moving functions from
-      the `.h` to the `.cpp` should not result in build errors.
+  - _Rationale_: Include files define the interface for the code in implementation files. Including one but
+    not linking the other is confusing. Please avoid that. Moving functions from
+    the `.h` to the `.cpp` should not result in build errors.
 
 - Use the RAII (Resource Acquisition Is Initialization) paradigm where possible. For example, by using
   `unique_ptr` for allocations in a function.
 
-  - *Rationale*: This avoids memory and resource leaks, and ensures exception safety.
+  - _Rationale_: This avoids memory and resource leaks, and ensures exception safety.
 
-C++ data structures
---------------------
+## C++ data structures
 
 - Never use the `std::map []` syntax when reading from a map, but instead use `.find()`.
 
-  - *Rationale*: `[]` does an insert (of the default element) if the item doesn't
+  - _Rationale_: `[]` does an insert (of the default element) if the item doesn't
     exist in the map yet. This has resulted in memory leaks in the past, as well as
-    race conditions (expecting read-read behavior). Using `[]` is fine for *writing* to a map.
+    race conditions (expecting read-read behavior). Using `[]` is fine for _writing_ to a map.
 
 - Do not compare an iterator from one data structure with an iterator of
   another data structure (even if of the same type).
 
-  - *Rationale*: Behavior is undefined. In C++ parlor this means "may reformat
+  - _Rationale_: Behavior is undefined. In C++ parlor this means "may reformat
     the universe", in practice this has resulted in at least one hard-to-debug crash bug.
 
 - Watch out for out-of-bounds vector access. `&vch[vch.size()]` is illegal,
   including `&vch[0]` for an empty vector. Use `vch.data()` and `vch.data() +
-  vch.size()` instead.
+vch.size()` instead.
 
 - Vector bounds checking is only enabled in debug mode. Do not rely on it.
 
@@ -663,7 +660,7 @@ C++ data structures
   If this is skipped for a good reason (i.e., optimization on the critical
   path), add an explicit comment about this.
 
-  - *Rationale*: Ensure determinism by avoiding accidental use of uninitialized
+  - _Rationale_: Ensure determinism by avoiding accidental use of uninitialized
     values. Also, static analyzers balk about this.
     Initializing the members in the declaration makes it easy to
     spot uninitialized ones.
@@ -677,7 +674,7 @@ class A
 
 - By default, declare constructors `explicit`.
 
-  - *Rationale*: This is a precaution to avoid unintended
+  - _Rationale_: This is a precaution to avoid unintended
     [conversions](https://en.cppreference.com/w/cpp/language/converting_constructor).
 
 - Use explicitly signed or unsigned `char`s, or even better `uint8_t` and
@@ -688,19 +685,20 @@ class A
 
 - Prefer explicit constructions over implicit ones that rely on 'magical' C++ behavior.
 
-  - *Rationale*: Easier to understand what is happening, thus easier to spot mistakes, even for those
-  that are not language lawyers.
- - Prefer signed ints and do not mix signed and unsigned integers. If an unsigned int is used, it should have a good
-   reason. The fact a value will never be negative is not a good reason. The most common reason will be that mod two
-   arithmetic is needed, such as in cryptographic primitives. If you need to make sure that some value is always
-   a non-negative one, use an assertion or exception instead.
-   - *Rationale*: When signed ints are mixed with unsigned ints, the signed int is converted to a unsigned
-   int. If the signed int is some negative `N`, it'll become `INT_MAX - N`  which might cause unexpected consequences.
+  - _Rationale_: Easier to understand what is happening, thus easier to spot mistakes, even for those
+    that are not language lawyers.
 
+- Prefer signed ints and do not mix signed and unsigned integers. If an unsigned int is used, it should have a good
+  reason. The fact a value will never be negative is not a good reason. The most common reason will be that mod two
+  arithmetic is needed, such as in cryptographic primitives. If you need to make sure that some value is always
+  a non-negative one, use an assertion or exception instead.
+
+  - _Rationale_: When signed ints are mixed with unsigned ints, the signed int is converted to a unsigned
+    int. If the signed int is some negative `N`, it'll become `INT_MAX - N` which might cause unexpected consequences.
 
 - Use `Span` as function argument when it can operate on any range-like container.
 
-  - *Rationale*: Compared to `Foo(const vector<int>&)` this avoids the need for a (potentially expensive)
+  - _Rationale_: Compared to `Foo(const vector<int>&)` this avoids the need for a (potentially expensive)
     conversion to vector if the caller happens to have the input stored in another type of container.
     However, be aware of the pitfalls documented in [span.h](../src/span.h).
 
@@ -713,7 +711,7 @@ Foo(vec);
 
 - Prefer `enum class` (scoped enumerations) over `enum` (traditional enumerations) where possible.
 
-  - *Rationale*: Scoped enumerations avoid two potential pitfalls/problems with traditional C++ enumerations: implicit conversions to `int`, and name clashes due to enumerators being exported to the surrounding scope.
+  - _Rationale_: Scoped enumerations avoid two potential pitfalls/problems with traditional C++ enumerations: implicit conversions to `int`, and name clashes due to enumerators being exported to the surrounding scope.
 
 - `switch` statement on an enumeration example:
 
@@ -737,31 +735,30 @@ int GetInt(Tabs tab)
 }
 ```
 
-*Rationale*: The comment documents skipping `default:` label, and it complies with `clang-format` rules. The assertion prevents firing of `-Wreturn-type` warning on some compilers.
+_Rationale_: The comment documents skipping `default:` label, and it complies with `clang-format` rules. The assertion prevents firing of `-Wreturn-type` warning on some compilers.
 
-Strings and formatting
-------------------------
+## Strings and formatting
 
 - Be careful of `LogPrint` versus `LogPrintf`. `LogPrint` takes a `category` argument, `LogPrintf` does not.
 
-  - *Rationale*: Confusion of these can result in runtime exceptions due to
+  - _Rationale_: Confusion of these can result in runtime exceptions due to
     formatting mismatch, and it is easy to get wrong because of subtly similar naming.
 
 - Use `std::string`, avoid C string manipulation functions.
 
-  - *Rationale*: C++ string handling is marginally safer, less scope for
+  - _Rationale_: C++ string handling is marginally safer, less scope for
     buffer overflows, and surprises with `\0` characters. Also, some C string manipulations
     tend to act differently depending on platform, or even the user locale.
 
 - Use `ParseInt32`, `ParseInt64`, `ParseUInt32`, `ParseUInt64`, `ParseDouble` from `utilstrencodings.h` for number parsing.
 
-  - *Rationale*: These functions do overflow checking and avoid pesky locale issues.
+  - _Rationale_: These functions do overflow checking and avoid pesky locale issues.
 
 - Avoid using locale dependent functions if possible. You can use the provided
   [`lint-locale-dependence.sh`](/test/lint/lint-locale-dependence.sh)
   to check for accidental use of locale dependent functions.
 
-  - *Rationale*: Unnecessary locale dependence can cause bugs that are very tricky to isolate and fix.
+  - _Rationale_: Unnecessary locale dependence can cause bugs that are very tricky to isolate and fix.
 
   - These functions are known to be locale dependent:
     `alphasort`, `asctime`, `asprintf`, `atof`, `atoi`, `atol`, `atoll`, `atoq`,
@@ -787,7 +784,7 @@ Strings and formatting
 
 - For `strprintf`, `LogPrint`, `LogPrintf` formatting characters don't need size specifiers.
 
-  - *Rationale*: Dash Core uses tinyformat, which is type safe. Leave them out to avoid confusion.
+  - _Rationale_: Dash Core uses tinyformat, which is type safe. Leave them out to avoid confusion.
 
 - Use `.c_str()` sparingly. Its only valid use is to pass C++ strings to C functions that take NULL-terminated
   strings.
@@ -795,15 +792,15 @@ Strings and formatting
   - Do not use it when passing a sized array (so along with `.size()`). Use `.data()` instead to get a pointer
     to the raw data.
 
-    - *Rationale*: Although this is guaranteed to be safe starting with C++11, `.data()` communicates the intent better.
+    - _Rationale_: Although this is guaranteed to be safe starting with C++11, `.data()` communicates the intent better.
 
   - Do not use it when passing strings to `tfm::format`, `strprintf`, `LogPrint[f]`.
 
-    - *Rationale*: This is redundant. Tinyformat handles strings.
+    - _Rationale_: This is redundant. Tinyformat handles strings.
 
   - Do not use it to convert to `QString`. Use `QString::fromStdString()`.
 
-    - *Rationale*: Qt has built-in functionality for converting their string
+    - _Rationale_: Qt has built-in functionality for converting their string
       type from/to C++. No need to roll your own.
 
   - In cases where do you call `.c_str()`, you might want to additionally check that the string does not contain embedded '\0' characters, because
@@ -811,8 +808,7 @@ Strings and formatting
     checks. If a use of strings is sensitive to this, take care to check the string for embedded NULL characters first
     and reject it if there are any (see `ParsePrechecks` in `strencodings.cpp` for an example).
 
-Shadowing
---------------
+## Shadowing
 
 Although the shadowing warning (`-Wshadow`) is not enabled by default (it prevents issues arising
 from using a different variable with the same name),
@@ -821,8 +817,7 @@ please name variables so that their names do not shadow variables defined in the
 When using nested cycles, do not name the inner cycle variable the same as in
 the upper cycle, etc.
 
-Threads and synchronization
-----------------------------
+## Threads and synchronization
 
 - Build and run tests with `-DDEBUG_LOCKORDER` to verify that no potential
   deadlocks are introduced.
@@ -832,6 +827,7 @@ Threads and synchronization
   with braces.
 
   OK:
+
 ```c++
 {
     TRY_LOCK(cs_vNodes, lockNodes);
@@ -839,7 +835,8 @@ Threads and synchronization
 }
 ```
 
-  Wrong:
+Wrong:
+
 ```c++
 TRY_LOCK(cs_vNodes, lockNodes);
 {
@@ -847,54 +844,54 @@ TRY_LOCK(cs_vNodes, lockNodes);
 }
 ```
 
-Scripts
---------------------------
+## Scripts
 
 ### Shebang
 
 - Use `#!/usr/bin/env bash` instead of obsolete `#!/bin/bash`.
 
-  - [*Rationale*](https://github.com/dylanaraps/pure-bash-bible#shebang):
+  - [_Rationale_](https://github.com/dylanaraps/pure-bash-bible#shebang):
 
     `#!/bin/bash` assumes it is always installed to /bin/ which can cause issues;
 
     `#!/usr/bin/env bash` searches the user's PATH to find the bash binary.
 
   OK:
+
 ```bash
 #!/usr/bin/env bash
 ```
 
-  Wrong:
+Wrong:
+
 ```bash
 #!/bin/bash
 ```
 
-Source code organization
---------------------------
+## Source code organization
 
 - Implementation code should go into the `.cpp` file and not the `.h`, unless necessary due to template usage or
   when performance due to inlining is critical.
 
-  - *Rationale*: Shorter and simpler header files are easier to read and reduce compile time.
+  - _Rationale_: Shorter and simpler header files are easier to read and reduce compile time.
 
 - Use only the lowercase alphanumerics (`a-z0-9`), underscore (`_`) and hyphen (`-`) in source code filenames.
 
-  - *Rationale*: `grep`:ing and auto-completing filenames is easier when using a consistent
+  - _Rationale_: `grep`:ing and auto-completing filenames is easier when using a consistent
     naming pattern. Potential problems when building on case-insensitive filesystems are
     avoided when using only lowercase characters in source code filenames.
 
 - Every `.cpp` and `.h` file should `#include` every header file it directly uses classes, functions or other
   definitions from, even if those headers are already included indirectly through other headers.
 
-  - *Rationale*: Excluding headers because they are already indirectly included results in compilation
+  - _Rationale_: Excluding headers because they are already indirectly included results in compilation
     failures when those indirect dependencies change. Furthermore, it obscures what the real code
     dependencies are.
 
 - Don't import anything into the global namespace (`using namespace ...`). Use
   fully specified types such as `std::string`.
 
-  - *Rationale*: Avoids symbol conflicts.
+  - _Rationale_: Avoids symbol conflicts.
 
 - Terminate namespaces with a comment (`// namespace mynamespace`). The comment
   should be placed on the same line as the brace closing the namespace, e.g.
@@ -909,12 +906,12 @@ namespace {
 } // namespace
 ```
 
-  - *Rationale*: Avoids confusion about the namespace context.
+- _Rationale_: Avoids confusion about the namespace context.
 
 - Use `#include <primitives/transaction.h>` bracket syntax instead of
   `#include "primitives/transactions.h"` quote syntax.
 
-  - *Rationale*: Bracket syntax is less ambiguous because the preprocessor
+  - _Rationale_: Bracket syntax is less ambiguous because the preprocessor
     searches a fixed list of include directories without taking location of the
     source file into account. This allows quoted includes to stand out more when
     the location of the source file actually is relevant.
@@ -929,12 +926,11 @@ namespace {
 #endif // BITCOIN_FOO_BAR_H
 ```
 
-GUI
------
+## GUI
 
 - Do not display or manipulate dialogs in model code (classes `*Model`).
 
-  - *Rationale*: Model classes pass through events and data from the core, they
+  - _Rationale_: Model classes pass through events and data from the core, they
     should not interact with the user. That's where View classes come in. The converse also
     holds: try to not directly access core data structures from Views.
 
@@ -948,11 +944,10 @@ GUI
   https://doc.qt.io/archives/qq/qq27-responsive-guis.html) to keep the GUI
   responsive.
 
-  - *Rationale*: Blocking the GUI thread can increase latency, and lead to
+  - _Rationale_: Blocking the GUI thread can increase latency, and lead to
     hangs and deadlocks.
 
-Subtrees
-----------
+## Subtrees
 
 Several parts of the repository are subtrees of software maintained elsewhere.
 
@@ -970,26 +965,29 @@ its upstream repository.
 Current subtrees include:
 
 - src/leveldb
+
   - Upstream at https://github.com/google/leveldb ; Maintained by Google, but
     open important PRs to Core to avoid delay.
   - **Note**: Follow the instructions in [Upgrading LevelDB](#upgrading-leveldb) when
     merging upstream changes to the LevelDB subtree.
 
 - src/crc32c
+
   - Used by leveldb for hardware acceleration of CRC32C checksums for data integrity.
   - Upstream at https://github.com/google/crc32c ; Maintained by Google.
 
 - src/secp256k1
+
   - Upstream at https://github.com/bitcoin-core/secp256k1/ ; actively maintained by Core contributors.
 
 - src/crypto/ctaes
+
   - Upstream at https://github.com/bitcoin-core/ctaes ; actively maintained by Core contributors.
 
 - src/univalue
   - Upstream at https://github.com/bitcoin-core/univalue ; actively maintained by Core contributors, deviates from upstream https://github.com/jgarzik/univalue
 
-Upgrading LevelDB
----------------------
+## Upgrading LevelDB
 
 Extra care must be taken when upgrading LevelDB. This section explains issues
 you must be aware of.
@@ -1035,8 +1033,7 @@ would be to revert the upstream fix before applying the updates to Bitcoin's
 copy of LevelDB. In general, you should be wary of any upstream changes affecting
 what data is returned from LevelDB queries.
 
-Scripted diffs
---------------
+## Scripted diffs
 
 For reformatting and refactoring commits where the changes can be easily automated using a bash script, we use
 scripted-diff commits. The bash script is included in the commit message and our Travis CI job checks that
@@ -1048,8 +1045,8 @@ To create a scripted-diff:
 
 - start the commit message with `scripted-diff:` (and then a description of the diff on the same line)
 - in the commit message include the bash script between lines containing just the following text:
-    - `-BEGIN VERIFY SCRIPT-`
-    - `-END VERIFY SCRIPT-`
+  - `-BEGIN VERIFY SCRIPT-`
+  - `-END VERIFY SCRIPT-`
 
 The scripted-diff is verified by the tool `test/lint/commit-script-check.sh`. The tool's default behavior, when supplied
 with a commit is to verify all scripted-diffs from the beginning of time up to said commit. Internally, the tool passes
@@ -1078,13 +1075,13 @@ introduce accidental changes.
 Some good examples of scripted-diff:
 
 - [scripted-diff: Rename InitInterfaces to NodeContext](https://github.com/bitcoin/bitcoin/commit/301bd41a2e6765b185bd55f4c541f9e27aeea29d)
-uses an elegant script to replace occurrences of multiple terms in all source files.
+  uses an elegant script to replace occurrences of multiple terms in all source files.
 
 - [scripted-diff: Remove g_connman, g_banman globals](https://github.com/bitcoin/bitcoin/commit/8922d7f6b751a3e6b3b9f6fb7961c442877fb65a)
-replaces specific terms in a list of specific source files.
+  replaces specific terms in a list of specific source files.
 
 - [scripted-diff: Replace fprintf with tfm::format](https://github.com/bitcoin/bitcoin/commit/fac03ec43a15ad547161e37e53ea82482cc508f9)
-does a global replacement but excludes certain directories.
+  does a global replacement but excludes certain directories.
 
 To find all previous uses of scripted diffs in the repository, do:
 
@@ -1092,8 +1089,7 @@ To find all previous uses of scripted diffs in the repository, do:
 git log --grep="-BEGIN VERIFY SCRIPT-"
 ```
 
-Release notes
--------------
+## Release notes
 
 Release notes should be written for any PR that:
 
@@ -1107,8 +1103,7 @@ Release notes should be added to a PR-specific release note file at
 All `release-notes*` files are merged into a single
 [/doc/release-notes.md](/doc/release-notes.md) file prior to the release.
 
-Release notes
--------------
+## Release notes
 
 Release notes should be written for any PR that:
 
@@ -1122,27 +1117,26 @@ Release notes should be added to a PR-specific release note file at
 All `release-notes*` files are merged into a single
 [/doc/release-notes.md](/doc/release-notes.md) file prior to the release.
 
-RPC interface guidelines
---------------------------
+## RPC interface guidelines
 
 A few guidelines for introducing and reviewing new RPC interfaces:
 
 - Method naming: use consecutive lower-case names such as `getrawtransaction` and `submitblock`.
 
-  - *Rationale*: Consistency with the existing interface.
+  - _Rationale_: Consistency with the existing interface.
 
 - Argument naming: use snake case `fee_delta` (and not, e.g. camel case `feeDelta`)
 
-  - *Rationale*: Consistency with the existing interface.
+  - _Rationale_: Consistency with the existing interface.
 
 - Use the JSON parser for parsing, don't manually parse integers or strings from
   arguments unless absolutely necessary.
 
-  - *Rationale*: Introduces hand-rolled string manipulation code at both the caller and callee sites,
+  - _Rationale_: Introduces hand-rolled string manipulation code at both the caller and callee sites,
     which is error-prone, and it is easy to get things such as escaping wrong.
     JSON already supports nested data structures, no need to re-invent the wheel.
 
-  - *Exception*: AmountFromValue can parse amounts as string. This was introduced because many JSON
+  - _Exception_: AmountFromValue can parse amounts as string. This was introduced because many JSON
     parsers and formatters hard-code handling decimal numbers as floating-point
     values, resulting in potential loss of precision. This is unacceptable for
     monetary values. **Always** use `AmountFromValue` and `ValueFromAmount` when
@@ -1156,46 +1150,46 @@ A few guidelines for introducing and reviewing new RPC interfaces:
   `params.size() <= x`. The former returns true if the argument is either null or missing,
   while the latter returns true if is missing, and false if it is null.
 
-  - *Rationale*: Avoids surprises when switching to name-based arguments. Missing name-based arguments
-  are passed as 'null'.
+  - _Rationale_: Avoids surprises when switching to name-based arguments. Missing name-based arguments
+    are passed as 'null'.
 
 - Try not to overload methods on argument type. E.g. don't make `getblock(true)` and `getblock("hash")`
   do different things.
 
-  - *Rationale*: This is impossible to use with `dash-cli`, and can be surprising to users.
+  - _Rationale_: This is impossible to use with `dash-cli`, and can be surprising to users.
 
-  - *Exception*: Some RPC calls can take both an `int` and `bool`, most notably when a bool was switched
+  - _Exception_: Some RPC calls can take both an `int` and `bool`, most notably when a bool was switched
     to a multi-value, or due to other historical reasons. **Always** have false map to 0 and
     true to 1 in this case.
 
 - Don't forget to fill in the argument names correctly in the RPC command table.
 
-  - *Rationale*: If not, the call can not be used with name-based arguments.
+  - _Rationale_: If not, the call can not be used with name-based arguments.
 
 - Add every non-string RPC argument `(method, idx, name)` to the table `vRPCConvertParams` in `rpc/client.cpp`.
 
-  - *Rationale*: `dash-cli` and the GUI debug console use this table to determine how to
+  - _Rationale_: `dash-cli` and the GUI debug console use this table to determine how to
     convert a plaintext command line to JSON. If the types don't match, the method can be unusable
     from there.
 
 - A RPC method must either be a wallet method or a non-wallet method. Do not
   introduce new methods that differ in behavior based on the presence of a wallet.
 
-  - *Rationale*: As well as complicating the implementation and interfering
+  - _Rationale_: As well as complicating the implementation and interfering
     with the introduction of multi-wallet, wallet and non-wallet code should be
     separated to avoid introducing circular dependencies between code units.
 
 - Try to make the RPC response a JSON object.
 
-  - *Rationale*: If a RPC response is not a JSON object, then it is harder to avoid API breakage if
+  - _Rationale_: If a RPC response is not a JSON object, then it is harder to avoid API breakage if
     new data in the response is needed.
 
 - Wallet RPCs call BlockUntilSyncedToCurrentChain to maintain consistency with
   `getblockchaininfo`'s state immediately prior to the call's execution. Wallet
-  RPCs whose behavior does *not* depend on the current chainstate may omit this
+  RPCs whose behavior does _not_ depend on the current chainstate may omit this
   call.
 
-  - *Rationale*: In previous versions of Dash Core, the wallet was always
+  - _Rationale_: In previous versions of Dash Core, the wallet was always
     in-sync with the chainstate (by virtue of them all being updated in the
     same cs_main lock). In order to maintain the behavior that wallet RPCs
     return results as of at least the highest best-known block an RPC
@@ -1206,26 +1200,25 @@ A few guidelines for introducing and reviewing new RPC interfaces:
 - Be aware of RPC method aliases and generally avoid registering the same
   callback function pointer for different RPCs.
 
-  - *Rationale*: RPC methods registered with the same function pointer will be
+  - _Rationale_: RPC methods registered with the same function pointer will be
     considered aliases and only the first method name will show up in the
     `help` RPC command list.
 
-  - *Exception*: Using RPC method aliases may be appropriate in cases where a
+  - _Exception_: Using RPC method aliases may be appropriate in cases where a
     new RPC is replacing a deprecated RPC, to avoid both RPCs confusingly
     showing up in the command list.
 
-- Use *invalid* Dash addresses (e.g. in the constant array `EXAMPLE_ADDRESS`) for
+- Use _invalid_ Dash addresses (e.g. in the constant array `EXAMPLE_ADDRESS`) for
   `RPCExamples` help documentation.
 
-  - *Rationale*: Prevent accidental transactions by users.
+  - _Rationale_: Prevent accidental transactions by users.
 
 - Use the `UNIX_EPOCH_TIME` constant when describing UNIX epoch time or
   timestamps in the documentation.
 
-  - *Rationale*: User-facing consistency.
+  - _Rationale_: User-facing consistency.
 
-Internal interface guidelines
------------------------------
+## Internal interface guidelines
 
 Internal interfaces between parts of the codebase that are meant to be
 independent (node, wallet, GUI), are defined in

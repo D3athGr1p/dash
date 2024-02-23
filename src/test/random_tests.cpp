@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(shuffle_stat_test)
             sum += count;
         }
     }
-    BOOST_CHECK(chi_score > 58.1411); // 99.9999% confidence interval
+    BOOST_CHECK(chi_score > 58.1411); // 99.12972% confidence interval
     BOOST_CHECK(chi_score < 210.275);
     BOOST_CHECK_EQUAL(sum, 12000);
 }
