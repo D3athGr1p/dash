@@ -27,42 +27,68 @@
 [[nodiscard]] static bool GetBlockTxOuts(const CBlockIndex* const pindexPrev, const CAmount blockSubsidy, const CAmount feeReward, std::vector<CTxOut>& voutMasternodePaymentsRet)
 {
     voutMasternodePaymentsRet.clear();
+    const Consensus::Params& consensusParams = Params().GetConsensus();
 
     const int nBlockHeight = pindexPrev  == nullptr ? 0 : pindexPrev->nHeight + 1;
 
     bool fV20Active =  llmq::utils::IsV20Active(pindexPrev);
     CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockSubsidy + feeReward, fV20Active);
 
-    if (llmq::utils::IsMNRewardReallocationActive(pindexPrev)) {
-        CAmount masternodeSubsidyReward = GetMasternodePayment(nBlockHeight, blockSubsidy, fV20Active);
-        const CAmount platformReward = MasternodePayments::PlatformShare(masternodeSubsidyReward);
-        masternodeReward -= platformReward;
+    auto dmnPayee = deterministicMNManager->GetListForBlock(pindexPrev).GetMNPayee(false, MnType::Regular);
 
-        assert(MoneyRange(masternodeReward));
+    bool isMnTierForkActivated = consensusParams.MNTierForkHeight <= pindexPrev->nHeight;
 
-        LogPrint(BCLog::MNPAYMENTS, "CMasternodePayments::%s -- MN reward %lld reallocated to credit pool\n", __func__, platformReward);
-        voutMasternodePaymentsRet.emplace_back(platformReward, CScript() << OP_RETURN);
+
+    CAmount mnTierOneReward = masternodeReward;
+    CAmount mnTierTwoReward = 0;
+    CDeterministicMNCPtr dmnPayee2;
+
+    if (isMnTierForkActivated) {
+        dmnPayee2 = deterministicMNManager->GetListForBlock(pindexPrev).GetMNPayee(false, MnType::Evo);
+
+        if (dmnPayee2) {
+            mnTierOneReward = (masternodeReward * (4400.0/48.0)) / 100;
+            mnTierTwoReward = masternodeReward - mnTierOneReward;
+        }
     }
 
-    auto dmnPayee = deterministicMNManager->GetListForBlock(pindexPrev).GetMNPayee(pindexPrev);
-    if (!dmnPayee) {
+    if (!dmnPayee && !dmnPayee2) {
         return false;
     }
 
-    CAmount operatorReward = 0;
+    if (dmnPayee) {
+        CAmount operatorReward = 0;
+        if (dmnPayee->nOperatorReward != 0 && dmnPayee->pdmnState->scriptOperatorPayout != CScript()) {
+            // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
+            // This will however only happen in a few years when the block rewards drops very low.
+            operatorReward = (mnTierOneReward * dmnPayee->nOperatorReward) / 10000;
+            mnTierOneReward -= operatorReward;
+        }
 
-    if (dmnPayee->nOperatorReward != 0 && dmnPayee->pdmnState->scriptOperatorPayout != CScript()) {
-        // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
-        // This will however only happen in a few years when the block rewards drops very low.
-        operatorReward = (masternodeReward * dmnPayee->nOperatorReward) / 10000;
-        masternodeReward -= operatorReward;
+        if (mnTierOneReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(mnTierOneReward, dmnPayee->pdmnState->scriptPayout);
+        }
+        if (operatorReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee->pdmnState->scriptOperatorPayout);
+        }
     }
 
-    if (masternodeReward > 0) {
-        voutMasternodePaymentsRet.emplace_back(masternodeReward, dmnPayee->pdmnState->scriptPayout);
-    }
-    if (operatorReward > 0) {
-        voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee->pdmnState->scriptOperatorPayout);
+    if (dmnPayee2) {
+        CAmount operatorReward = 0;
+
+        if (dmnPayee2->nOperatorReward != 0 && dmnPayee2->pdmnState->scriptOperatorPayout != CScript()) {
+            // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
+            // This will however only happen in a few years when the block rewards drops very low.
+            operatorReward = (mnTierTwoReward * dmnPayee2->nOperatorReward) / 10000;
+            mnTierTwoReward -= operatorReward;
+        }
+
+        if (mnTierTwoReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(mnTierTwoReward, dmnPayee2->pdmnState->scriptPayout);
+        }
+        if (operatorReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee2->pdmnState->scriptOperatorPayout);
+        }
     }
 
     return true;
@@ -103,18 +129,39 @@
     }
 
     std::vector<CTxOut> voutMasternodePayments;
-    if (!GetBlockTxOuts(pindexPrev, blockSubsidy, feeReward, voutMasternodePayments)) {
+    // if (isExtraFundAllocationHeight(nBlockHeight)) {
+    //     blockSubsidy -= GetExtraPayOutAmount(nBlockHeight);
+    // }
+    if (!GetBlockTxOuts(pindexPrev, isExtraFundAllocationHeight(nBlockHeight) ? blockSubsidy - GetExtraPayOutAmount(nBlockHeight) : blockSubsidy, feeReward, voutMasternodePayments)) {
         LogPrintf("MasternodePayments::%s -- ERROR failed to get payees for block at height %s\n", __func__, nBlockHeight);
         return true;
     }
 
+    // for (const auto& txout : voutMasternodePayments) {
+    //     bool found = ranges::any_of(txNew.vout, [&txout](const auto& txout2) {return txout == txout2;});
+    //     if (!found) {
+    //         CTxDestination dest;
+    //         if (!ExtractDestination(txout.scriptPubKey, dest))
+    //             assert(false);
+    //         LogPrintf("MasternodePayments::%s -- ERROR failed to find expected payee %s in block at height %s\n", __func__, EncodeDestination(dest), nBlockHeight);
+    //         return false;
+    //     }
+    // }
+
     for (const auto& txout : voutMasternodePayments) {
-        bool found = ranges::any_of(txNew.vout, [&txout](const auto& txout2) {return txout == txout2;});
+        bool found = false;
+        for (const auto& txout2 : txNew.vout) {
+            LogPrintf(">>>>>>>>>>>>>>>>>>> %s\n%s \n\n\n", txout.ToString(), txout2.ToString());
+            if (txout == txout2) {
+                found = true;
+                break;
+            }
+        }
         if (!found) {
             CTxDestination dest;
             if (!ExtractDestination(txout.scriptPubKey, dest))
                 assert(false);
-            LogPrintf("MasternodePayments::%s -- ERROR failed to find expected payee %s in block at height %s\n", __func__, EncodeDestination(dest), nBlockHeight);
+            LogPrintf("CMasternodePayments::%s -- ERROR failed to find expected payee %s in block at height %s\n", __func__, EncodeDestination(dest), nBlockHeight);
             return false;
         }
     }

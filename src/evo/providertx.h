@@ -73,10 +73,10 @@ public:
                 obj.inputsHash
         );
         if (obj.nType == MnType::Evo) {
-            READWRITE(
-                obj.platformNodeID,
-                obj.platformP2PPort,
-                obj.platformHTTPPort);
+            // READWRITE(
+            //     obj.platformNodeID,
+            //     obj.platformP2PPort,
+            //     obj.platformHTTPPort);
         }
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(obj.vchSig);

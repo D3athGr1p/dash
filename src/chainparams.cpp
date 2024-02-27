@@ -172,6 +172,8 @@ public:
         consensus.nSuperblockStartBlock = 1;
         consensus.nSuperblockStartHash = uint256S("0x");
         consensus.nSuperblockCycle = 14600;
+        consensus.nNewSuperBlockCycle = 29200;
+        consensus.nNewSuperBlockStartHeight = 87601;
         consensus.nSuperblockMaturityWindow = 1662; // ~(60*24*3)/2.6, ~3 days before actual Superblock is emitted
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
@@ -188,9 +190,9 @@ public:
         consensus.DIP0003EnforcementHash = uint256S("0x");
         consensus.DIP0008Height = 2;
         consensus.BRRHeight = 12096;
-        consensus.DIP0020Height = 1516032;
+        consensus.DIP0020Height = 0;
         consensus.DIP0024Height = 1737792;
-        consensus.V19Height = 1899072;
+        consensus.V19Height = 99999999;
         consensus.MinBIP9WarningHeight = 1899072 + 2016;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nPowTargetTimespan = 9 * 60;
@@ -203,9 +205,13 @@ public:
         consensus.nPowDGWHeight = 1;
         consensus.nRuleChangeActivationThreshold = 3; // 95% of 2016
         consensus.nMinerConfirmationWindow = 3; // nPowTargetTimespan / nPowTargetSpacing
-        consensus.DevelopementFundShare = 3;
         consensus.DevRewardStartHeight = 16700;
+        consensus.DevelopementFundShare = 3;
         consensus.DevelopmentFundAddress = "B4ZQyV266uUDFyJa3vr7D7RV9TD18Th3Dp";
+        consensus.ExtraPayoutAddress = "BK25fSfNGPMqS3jHDKm4h2Ad9y8HxsnFL6";
+        consensus.MNTierForkHeight = 87500; 
+        consensus.V3ForkHeight = 87500;
+        consensus.RegularNodePercentage = 10;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008

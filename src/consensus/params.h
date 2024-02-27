@@ -95,6 +95,8 @@ struct Params {
     int nSuperblockStartBlock;
     uint256 nSuperblockStartHash;
     int nSuperblockCycle; // in blocks
+    int nNewSuperBlockCycle;
+    int nNewSuperBlockStartHeight;
     int nSuperblockMaturityWindow; // in blocks
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
     int nGovernanceFilterElements;
@@ -155,6 +157,12 @@ struct Params {
     uint256 defaultAssumeValid;
     int DevelopementFundShare;
     int DevRewardStartHeight;
+    // This address will receive extra fund at cetain height
+    std::string ExtraPayoutAddress;
+    /** Block height at which MNTier fork becomes enforced*/
+    int MNTierForkHeight;
+    int RegularNodePercentage;
+    int V3ForkHeight;
     std::string DevelopmentFundAddress;
 
     int64_t GetCurrentPowTargetSpacing(const int& nHeight) const

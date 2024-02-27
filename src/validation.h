@@ -199,6 +199,8 @@ void StopScriptCheckWorkerThreads();
 CTransactionRef GetTransaction(const CBlockIndex* const block_index, const CTxMemPool* const mempool, const uint256& hash, const Consensus::Params& consensusParams, uint256& hashBlock);
 
 double ConvertBitsToDouble(unsigned int nBits);
+bool isExtraFundAllocationHeight(int nHeight);
+CAmount GetExtraPayOutAmount(int nHeight);
 /**
  * Due to difference in logic, the GetBlockSubsidy() has also different list of
  * arguments.
