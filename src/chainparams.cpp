@@ -190,7 +190,7 @@ public:
         consensus.DIP0003EnforcementHash = uint256S("0x");
         consensus.DIP0008Height = 2;
         consensus.BRRHeight = 12096;
-        consensus.DIP0020Height = 0;
+        consensus.DIP0020Height = 12096;
         consensus.DIP0024Height = 1737792;
         consensus.V19Height = 99999999;
         consensus.MinBIP9WarningHeight = 1899072 + 2016;
