@@ -174,6 +174,8 @@ public:
         consensus.nPowDGWHeight = 1;
         consensus.nRuleChangeActivationThreshold = 3; // 95% of 2016
         consensus.nMinerConfirmationWindow = 3; // nPowTargetTimespan / nPowTargetSpacing
+        consensus.DevRewardStartHeight = 16700;
+        consensus.DevelopmentFundAddress = "B4ZQyV266uUDFyJa3vr7D7RV9TD18Th3Dp";
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
