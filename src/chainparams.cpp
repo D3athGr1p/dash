@@ -260,7 +260,7 @@ public:
         pchMessageStart[1] = 0x0c;
         pchMessageStart[2] = 0x6b;
         pchMessageStart[3] = 0xbd;
-        nDefaultPort = 9999;
+        nDefaultPort = 12972;
         nDefaultPlatformP2PPort = 26656;
         nDefaultPlatformHTTPPort = 443;
         nPruneAfterHeight = 100000;
