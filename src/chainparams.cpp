@@ -77,8 +77,8 @@ static CBlock CreateDevNetGenesisBlock(const uint256 &prevBlockHash, const std::
  */
 static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
-    const char* pszTimestamp = "Wired 09/Jan/2014 The Grand Experiment Goes Live: Overstock.com Is Now Accepting Bitcoins";
-    const CScript genesisOutputScript = CScript() << ParseHex("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9") << OP_CHECKSIG;
+    const char* pszTimestamp = "Passwords are like briefs change often and do not share with strangers";
+    const CScript genesisOutputScript = CScript() << ParseHex("04d876d098d08bcf1bcd099724d8e9b48823928b51faff38e4bc21e9e290961e4a6acba29729847483b48b569e133c8e95a3ee129f87eb28446495ee58a665cf87") << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
@@ -246,10 +246,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_V19].nFalloffCoeff = 5;            // this corresponds to 10 periods
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000008677827656704520eb39"); // 1889000
+        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000000000000100010"); // 1889000
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00000000000000075300e852d5bf5380f905b2768241f8b442498442084807a7"); // 1889000
+        consensus.defaultAssumeValid = uint256S("0x000000fd77883d82808c84b94839f98aaf7f8abae61afb8d5b771f982f19fe74"); // 1889000
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -267,10 +267,10 @@ public:
         m_assumed_blockchain_size = 45;
         m_assumed_chain_state_size = 1;
 
-        genesis = CreateGenesisBlock(1390095618, 28917698, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1688101642, 144927, 0x1e0ffff0, 1, 2000 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
+        assert(consensus.hashGenesisBlock == uint256S("0x000000fd77883d82808c84b94839f98aaf7f8abae61afb8d5b771f982f19fe74"));
+        assert(genesis.hashMerkleRoot == uint256S("0x1a63dcfbc0f45c53796d840fcc2f2b155d5c55abcb54776be4bdd9dd1487bfa3"));
 
         // Note that of those which support the service bits prefix, most only support a subset of
         // possible options.
@@ -280,11 +280,11 @@ public:
         vSeeds.emplace_back("dnsseed.dash.org");
 
         // Dash addresses start with 'X'
-        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,76);
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,25);
         // Dash script addresses start with '7'
-        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,16);
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,26);
         // Dash private keys start with '7' or 'X'
-        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,204);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,153);
         // Dash BIP32 pubkeys start with 'xpub' (Bitcoin defaults)
         base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
         // Dash BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
@@ -293,7 +293,7 @@ public:
         // Dash BIP44 coin type is '5'
         nExtCoinType = 5;
 
-        vFixedSeeds = std::vector<SeedSpec6>(std::begin(pnSeed6_main), std::end(pnSeed6_main));
+        // vFixedSeeds = std::vector<SeedSpec6>(std::begin(pnSeed6_main), std::end(pnSeed6_main));
 
         // long living quorum params
         AddLLMQ(Consensus::LLMQType::LLMQ_50_60);
@@ -320,51 +320,36 @@ public:
         nPoolMaxParticipants = 20;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
-        vSporkAddresses = {"Xgtyuk76vhuFW2iT7UAiHgNdWXCf3J34wh"};
+        vSporkAddresses = {"BGauBwUJ66u9DxHKqb8WChtXmQTF5mLHq3"};
         nMinSporkKeys = 1;
         fBIP9CheckMasternodesUpgraded = true;
 
         checkpointData = {
             {
-                {1500, uint256S("0x000000aaf0300f59f49bc3e970bad15c11f961fe2347accffff19d96ec9778e3")},
-                {4991, uint256S("0x000000003b01809551952460744d5dbb8fcbd6cbae3c220267bf7fa43f837367")},
-                {9918, uint256S("0x00000000213e229f332c0ffbe34defdaa9e74de87f2d8d1f01af8d121c3c170b")},
-                {16912, uint256S("0x00000000075c0d10371d55a60634da70f197548dbbfa4123e12abfcbc5738af9")},
-                {23912, uint256S("0x0000000000335eac6703f3b1732ec8b2f89c3ba3a7889e5767b090556bb9a276")},
-                {35457, uint256S("0x0000000000b0ae211be59b048df14820475ad0dd53b9ff83b010f71a77342d9f")},
-                {45479, uint256S("0x000000000063d411655d590590e16960f15ceea4257122ac430c6fbe39fbf02d")},
-                {55895, uint256S("0x0000000000ae4c53a43639a4ca027282f69da9c67ba951768a20415b6439a2d7")},
-                {68899, uint256S("0x0000000000194ab4d3d9eeb1f2f792f21bb39ff767cb547fe977640f969d77b7")},
-                {74619, uint256S("0x000000000011d28f38f05d01650a502cc3f4d0e793fbc26e2a2ca71f07dc3842")},
-                {75095, uint256S("0x0000000000193d12f6ad352a9996ee58ef8bdc4946818a5fec5ce99c11b87f0d")},
-                {88805, uint256S("0x00000000001392f1652e9bf45cd8bc79dc60fe935277cd11538565b4a94fa85f")},
-                {107996, uint256S("0x00000000000a23840ac16115407488267aa3da2b9bc843e301185b7d17e4dc40")},
-                {137993, uint256S("0x00000000000cf69ce152b1bffdeddc59188d7a80879210d6e5c9503011929c3c")},
-                {167996, uint256S("0x000000000009486020a80f7f2cc065342b0c2fb59af5e090cd813dba68ab0fed")},
-                {207992, uint256S("0x00000000000d85c22be098f74576ef00b7aa00c05777e966aff68a270f1e01a5")},
-                {312645, uint256S("0x0000000000059dcb71ad35a9e40526c44e7aae6c99169a9e7017b7d84b1c2daf")},
-                {407452, uint256S("0x000000000003c6a87e73623b9d70af7cd908ae22fee466063e4ffc20be1d2dbc")},
-                {523412, uint256S("0x000000000000e54f036576a10597e0e42cc22a5159ce572f999c33975e121d4d")},
-                {523930, uint256S("0x0000000000000bccdb11c2b1cfb0ecab452abf267d89b7f46eaf2d54ce6e652c")},
-                {750000, uint256S("0x00000000000000b4181bbbdddbae464ce11fede5d0292fb63fdede1e7c8ab21c")},
-                {888900, uint256S("0x0000000000000026c29d576073ab51ebd1d3c938de02e9a44c7ee9e16f82db28")},
-                {967800, uint256S("0x0000000000000024e26c7df7e46d673724d223cf4ca2b2adc21297cc095600f4")},
-                {1067570, uint256S("0x000000000000001e09926bcf5fa4513d23e870a34f74e38200db99eb3f5b7a70")},
-                {1167570, uint256S("0x000000000000000fb7b1e9b81700283dff0f7d87cf458e5edfdae00c669de661")},
-                {1364585, uint256S("0x00000000000000022f355c52417fca9b73306958f7c0832b3a7bce006ca369ef")},
-                {1450000, uint256S("0x00000000000000105cfae44a995332d8ec256850ea33a1f7b700474e3dad82bc")},
-                {1796500, uint256S("0x000000000000001d531f36005159f19351bd49ca676398a561e55dcccb84eacd")},
-                {1850400, uint256S("0x00000000000000261bdbe99c01fcba992e577efa6cc41aae564b8ca9f112b2a3")},
-                {1889000, uint256S("0x00000000000000075300e852d5bf5380f905b2768241f8b442498442084807a7")},
+                {0, uint256S("0x000000fd77883d82808c84b94839f98aaf7f8abae61afb8d5b771f982f19fe74")},
+                {1259, uint256S("0x0000000000001a2503b3554b600e9662ea49d84525b26ed43bb870aafb6a6802")},
+                {4475, uint256S("0x00000000000000fb0561802ea9acc46b70fe78e405024d8f08b013f37b177799")},
+                {10825, uint256S("0x00000000000000196faa0cdf00e25c9c7220bfcdc9e2873367526ed8476d7a88")},
+                {14426, uint256S("0x000000000000000b05cb80e138a7c9c3fc2faa640e9c67c3ae1a4e31e394cf09")},
+                {16154, uint256S("0x000000000000016fb125e52e9e667f05a3f9a61a21b49e5b65ef084fc3be1bab")},
+                {17077, uint256S("0x000000000000000793dc563cd63596c5f067d736f5ee39df4aa5f76cd895bba4")},
+                {25654, uint256S("0x00000000000000742ef0fd1bff12241390219ae9cacb091556d1c7202874fc00")},
+                {38412, uint256S("0x00000000000000175230dfb2e5a5e5745f5b680781fd5ad39050ebd051286944")},
+                {51482, uint256S("0x0000000000000013a9360cb82a8c060b2aafd9040139220092a7109e38626c60")},
+                {62541, uint256S("0x0000000000000050fd89facd5f17a48b70d188d899483eb0ab5b14cc6e67ece5")},
+                {74985, uint256S("0x000000000000004cfec6a72a8770d741a06b02532851c46a9e8a587433406f06")},
+                {85330, uint256S("0x000000000000002e87c0b53d5ce7ea2d27b794330076d2a03555d46cfc46d973")},
+                {90281, uint256S("0x000000000000001ce9851e375bc022afb673ad82882a2fb1caa1479e1b7c92fd")},
+                {95194, uint256S("0x000000000000002518c37c688a48aaddcdb6db52ab3a19c9efdf7bb70ee82ae8")},
             }
         };
 
         // getchaintxstats 17280 00000000000000075300e852d5bf5380f905b2768241f8b442498442084807a7
         chainTxData = ChainTxData{
-                1687008680, // * UNIX timestamp of last known number of transactions (Block 1889000)
-                48071282,   // * total number of transactions between genesis and that timestamp
+                1688101642, // * UNIX timestamp of last known number of transactions (Block 1889000)
+                0,   // * total number of transactions between genesis and that timestamp
                             //   (the tx=... number in the ChainStateFlushed debug.log lines)
-                0.1420701358442986,      // * estimated number of transactions per second after that timestamp
+                0,      // * estimated number of transactions per second after that timestamp
         };
     }
 };
