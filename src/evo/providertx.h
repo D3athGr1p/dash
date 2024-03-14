@@ -72,10 +72,10 @@ public:
                 obj.inputsHash
         );
         if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
-            READWRITE(
-                obj.platformNodeID,
-                obj.platformP2PPort,
-                obj.platformHTTPPort);
+            // READWRITE(
+            //     obj.platformNodeID,
+            //     obj.platformP2PPort,
+            //     obj.platformHTTPPort);
         }
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(obj.vchSig);

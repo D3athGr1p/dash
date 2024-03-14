@@ -276,27 +276,67 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
 {
     voutMasternodePaymentsRet.clear();
 
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+
     const CBlockIndex* pindex = WITH_LOCK(cs_main, return ::ChainActive()[nBlockHeight - 1]);
-    auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(pindex);
+    auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(false, MnType::Regular);
     if (!dmnPayee) {
         return false;
     }
 
-    CAmount operatorReward = 0;
-    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward, Params().GetConsensus().BRRHeight);
+    bool isMnTierForkActivated = consensusParams.MNTierForkHeight <= pindexPrev->nHeight;
+    // DON'T KNOW
+    CAmount masternodeReward = GetMasternodePayment(nBlockHeight, blockReward, false);
+    CAmount mnTierOneReward = masternodeReward;
+    CAmount mnTierTwoReward = 0;
+    CDeterministicMNCPtr dmnPayee2;
 
-    if (dmnPayee->nOperatorReward != 0 && dmnPayee->pdmnState->scriptOperatorPayout != CScript()) {
-        // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
-        // This will however only happen in a few years when the block rewards drops very low.
-        operatorReward = (masternodeReward * dmnPayee->nOperatorReward) / 10000;
-        masternodeReward -= operatorReward;
+    if (isMnTierForkActivated) {
+        dmnPayee2 = deterministicMNManager->GetListForBlock(pindexPrev).GetMNPayee(false, MnType::Evo);
+
+        if (dmnPayee2) {
+            mnTierOneReward = (masternodeReward * (4400.0/48.0)) / 100;
+            mnTierTwoReward = masternodeReward - mnTierOneReward;
+        }
     }
 
-    if (masternodeReward > 0) {
-        voutMasternodePaymentsRet.emplace_back(masternodeReward, dmnPayee->pdmnState->scriptPayout);
+    if (!dmnPayee && !dmnPayee2) {
+        return false;
     }
-    if (operatorReward > 0) {
-        voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee->pdmnState->scriptOperatorPayout);
+
+    if (dmnPayee) {
+        CAmount operatorReward = 0;
+        if (dmnPayee->nOperatorReward != 0 && dmnPayee->pdmnState->scriptOperatorPayout != CScript()) {
+            // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
+            // This will however only happen in a few years when the block rewards drops very low.
+            operatorReward = (mnTierOneReward * dmnPayee->nOperatorReward) / 10000;
+            mnTierOneReward -= operatorReward;
+        }
+
+        if (mnTierOneReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(mnTierOneReward, dmnPayee->pdmnState->scriptPayout);
+        }
+        if (operatorReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee->pdmnState->scriptOperatorPayout);
+        }
+    }
+
+    if (dmnPayee2) {
+        CAmount operatorReward = 0;
+
+        if (dmnPayee2->nOperatorReward != 0 && dmnPayee2->pdmnState->scriptOperatorPayout != CScript()) {
+            // This calculation might eventually turn out to result in 0 even if an operator reward percentage is given.
+            // This will however only happen in a few years when the block rewards drops very low.
+            operatorReward = (mnTierTwoReward * dmnPayee2->nOperatorReward) / 10000;
+            mnTierTwoReward -= operatorReward;
+        }
+
+        if (mnTierTwoReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(mnTierTwoReward, dmnPayee2->pdmnState->scriptPayout);
+        }
+        if (operatorReward > 0) {
+            voutMasternodePaymentsRet.emplace_back(operatorReward, dmnPayee2->pdmnState->scriptOperatorPayout);
+        }
     }
 
     return true;
@@ -310,13 +350,19 @@ bool CMasternodePayments::IsTransactionValid(const CTransaction& txNew, int nBlo
     }
 
     std::vector<CTxOut> voutMasternodePayments;
-    if (!GetBlockTxOuts(nBlockHeight, blockReward, voutMasternodePayments)) {
+    if (!GetBlockTxOuts(nBlockHeight, isExtraFundAllocationHeight(nBlockHeight) ? blockReward - GetExtraPayOutAmount(nBlockHeight) : blockReward, voutMasternodePayments)) {
         LogPrintf("CMasternodePayments::%s -- ERROR failed to get payees for block at height %s\n", __func__, nBlockHeight);
         return true;
     }
 
     for (const auto& txout : voutMasternodePayments) {
-        bool found = ranges::any_of(txNew.vout, [&txout](const auto& txout2) {return txout == txout2;});
+        bool found = false;
+        for (const auto& txout2 : txNew.vout) {
+            if (txout == txout2) {
+                found = true;
+                break;
+            }
+        }
         if (!found) {
             CTxDestination dest;
             if (!ExtractDestination(txout.scriptPubKey, dest))

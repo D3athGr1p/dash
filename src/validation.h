@@ -209,6 +209,8 @@ CTransactionRef GetTransaction(const CBlockIndex* const block_index, const CTxMe
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>()) LOCKS_EXCLUDED(cs_main);
 
 double ConvertBitsToDouble(unsigned int nBits);
+bool isExtraFundAllocationHeight(int nHeight);
+CAmount GetExtraPayOutAmount(int nHeight);
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly = false);
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue, int nReallocActivationHeight = std::numeric_limits<int>::max() /* not activated */);
 

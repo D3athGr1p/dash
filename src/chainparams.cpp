@@ -177,6 +177,10 @@ public:
         consensus.DevRewardStartHeight = 16700;
         consensus.DevelopementFundShare = 3;
         consensus.DevelopmentFundAddress = "B4ZQyV266uUDFyJa3vr7D7RV9TD18Th3Dp";
+        consensus.ExtraPayoutAddress = "BK25fSfNGPMqS3jHDKm4h2Ad9y8HxsnFL6";
+        consensus.MNTierForkHeight = 87500; 
+        consensus.V3ForkHeight = 87500;
+        consensus.RegularNodePercentage = 10;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008

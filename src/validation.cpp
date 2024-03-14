@@ -529,6 +529,20 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         *pfMissingInputs = false;
     }
 
+    if (::ChainActive().Height() > chainparams.GetConsensus().V3ForkHeight && tx.nType == TRANSACTION_PROVIDER_UPDATE_SERVICE) {
+        // this condition will be removed from next version
+        if (Params().NetworkIDString() == CBaseChainParams::MAIN && ::ChainActive().Height() < 106300) {
+            return false;
+        }
+        CProUpServTx proTx;
+        if (GetTxPayload(tx, proTx)) {
+            auto dmn = deterministicMNManager->GetListAtChainTip().GetMN(proTx.proTxHash);
+            if (dmn->nType == MnType::Evo) {
+                return false;
+            }
+        }
+    }
+
     if (!CheckTransaction(tx, state))
         return false; // state filled in by CheckTransaction
 
@@ -1002,6 +1016,75 @@ double ConvertBitsToDouble(unsigned int nBits)
     return dDiff;
 }
 
+bool isExtraFundAllocationHeight(int nHeight) {
+
+    if (Params().NetworkIDString() == CBaseChainParams::MAIN) {
+        if (nHeight == 87500) {
+            return true;
+        } else if (nHeight == 130000) {
+            return true;
+        } else if (nHeight == 220000) {
+            return true;
+        } else if (nHeight == 400000) {
+            return true;
+        } else if (nHeight == 575000) {
+            return true;
+        } else if (nHeight == 750000) {
+            return true;
+        } else if (nHeight == 925000) {
+            return true;
+        } else if (nHeight == 1100000) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        int allocationHeight = Params().GetConsensus().V3ForkHeight;
+        if (nHeight == allocationHeight + 2) {
+            return true;
+        } else if (nHeight == allocationHeight + 4) {
+            return true;
+        } else if (nHeight == allocationHeight + 6) {
+            return true;
+        } else if (nHeight == allocationHeight + 8) {
+            return true;
+        } else if (nHeight == allocationHeight + 10) {
+            return true;
+        } else if (nHeight == allocationHeight + 33) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+}
+
+// CHANGE LOGIC HERE
+CAmount GetExtraPayOutAmount(int nHeight) {
+    CAmount ExtraPayOutAmount;
+
+    if (nHeight == 87500) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 130000) {
+        ExtraPayOutAmount = 2000000;
+    } else if (nHeight == 220000) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 400000) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 575000) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 750000) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 925000) {
+        ExtraPayOutAmount = 1000000;
+    } else if (nHeight == 1100000) {
+        ExtraPayOutAmount = 1000000;
+    } else {
+        ExtraPayOutAmount = 0;
+    }
+
+    return ExtraPayOutAmount * COIN;
+}
+
 /*
 NOTE:   unlike bitcoin we are using PREVIOUS block height here,
         might be a good idea to change this to use prev bits
@@ -1011,25 +1094,25 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
 {
     CAmount nSubsidyBase;
 
-    if (nPrevHeight == 0) {
+    if (nPrevHeight == 1) {
         nSubsidyBase = 3000000;
-    } else if (nPrevHeight <= 6000 ) {
+    } else if (nPrevHeight <= 6001 ) {
         nSubsidyBase = 2000;
-    } else if (nPrevHeight <= 14000) {
+    } else if (nPrevHeight <= 14001) {
         nSubsidyBase = 1000;
-    } else if (nPrevHeight <= 24000) {
+    } else if (nPrevHeight <= 24001) {
         nSubsidyBase = 800;
-    } else if (nPrevHeight <= 44000) {
+    } else if (nPrevHeight <= 44001) {
         nSubsidyBase = 600;
-    } else if (nPrevHeight <= 74000) {
+    } else if (nPrevHeight <= 74001) {
         nSubsidyBase = 400;
-    } else if (nPrevHeight <= 87500) {
+    } else if (nPrevHeight <= 87501) {
         nSubsidyBase = 300;
-    } else if (nPrevHeight <= 172000) {
+    } else if (nPrevHeight <= 172001) {
         nSubsidyBase = 150;
-    } else if (nPrevHeight <= 316000) {
+    } else if (nPrevHeight <= 316001) {
         nSubsidyBase = 120;
-    } else if (nPrevHeight <= 460000) {
+    } else if (nPrevHeight <= 460001) {
         nSubsidyBase = 100;
     } else if (nPrevHeight <= 604000) {
         nSubsidyBase = 80;
@@ -1076,19 +1159,21 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
     } else {
 	    nSubsidyBase = 0;
     }
-
     CAmount nSubsidy = nSubsidyBase * COIN;
-
     // this is only active on devnets
     if (nPrevHeight < consensusParams.nHighSubsidyBlocks) {
         nSubsidy *= consensusParams.nHighSubsidyFactor;
     }
 
-    CAmount nSuperblockPart; 
-    if (nPrevHeight < 16700) {
-        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
-    } else {
-        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
+    CAmount nSuperblockPart = 0; 
+    if (nPrevHeight > 2) {
+        if (nPrevHeight <= 16700) {
+            nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
+        } else if (nPrevHeight <= consensusParams.V3ForkHeight + 1) {
+            nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
+        } else {
+            nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;
+        }
     }
 
     return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
@@ -1116,7 +1201,12 @@ CAmount GetMasternodePayment(int nHeight, CAmount blockValue, int nReallocActiva
         return ret;
     }
 
-    int nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
+    int nSuperblockCycle;
+    if (nHeight < Params().GetConsensus().nNewSuperBlockStartHeight) {
+        nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
+    } else {
+        nSuperblockCycle = Params().GetConsensus().nNewSuperBlockCycle;
+    }
 
     int nReallocStart = nReallocActivationHeight - nReallocActivationHeight % nSuperblockCycle + nSuperblockCycle;
 
@@ -2377,6 +2467,10 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     int64_t nTime5_3 = GetTimeMicros(); nTimeValueValid += nTime5_3 - nTime5_2;
     LogPrint(BCLog::BENCHMARK, "      - IsBlockValueValid: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime5_3 - nTime5_2), nTimeValueValid * MICRO, nTimeValueValid * MILLI / nBlocksTotal);
+
+    if (isExtraFundAllocationHeight(pindex->nHeight)) {
+        blockReward += GetExtraPayOutAmount(pindex->nHeight);
+    }
 
     if (!IsBlockPayeeValid(*sporkManager, *governance, *block.vtx[0], pindex->nHeight, blockReward)) {
         // NOTE: Do not punish, the node might be missing governance data
@@ -3794,10 +3888,14 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
         if (nHeight > 18000 && nHeight <= 24000) {
             devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * 18) / 100;
-        } else if (nHeight <= 87500) {
-            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * consensusParams.DevelopementFundShare) / 100;
+        } else if (nHeight == 24001) {
+            devPayoutValue = 1674000000;
+        } else if (nHeight < consensusParams.V3ForkHeight) {
+            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * consensusParams.DevelopementFundShare) / 100;
+        } else if (nHeight == 87500) {
+            devPayoutValue = 837000000;
         } else {
-            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * (300.0/95.0)) / 100;
+            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * (300.0/95.0)) / 100;
         }
 
         bool found = false;
@@ -3806,7 +3904,22 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
                 break;
         }
         if (!found)
-            return state.Invalid(BlockValidationResult::BLOCK_RESULT_UNSET, "Developer reward check failed");
+            return state.Invalid(BlockValidationResult::CONSENSUS, "Developer reward check failed");
+    }
+
+    if(isExtraFundAllocationHeight(nHeight)) {
+        CScript additionalPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.ExtraPayoutAddress));
+        CAmount extraFund = GetExtraPayOutAmount(nHeight);
+
+
+        bool found = false;
+        for (const CTxOut& txout : block.vtx[0]->vout) {
+            if ((found = txout.scriptPubKey == additionalPayoutScript && txout.nValue == extraFund) == true)
+                break;
+        }
+        if (!found) {
+            return state.Invalid(BlockValidationResult::CONSENSUS, "Extra reward allocation check failed");
+        }
     }
     
     // sigops limits (relaxed)

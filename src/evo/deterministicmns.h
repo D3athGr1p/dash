@@ -175,6 +175,8 @@ private:
     int nHeight{-1};
     uint32_t nTotalRegisteredCount{0};
     MnMap mnMap;
+    MnMap tierOne;
+    MnMap tierTwo;
     MnInternalIdMap mnInternalIdMap;
 
     // map of unique properties like address and keys
@@ -212,6 +214,8 @@ public:
     template<typename Stream>
     void Unserialize(Stream& s, const uint8_t format_version = CDeterministicMN::MN_CURRENT_FORMAT) {
         mnMap = MnMap();
+        tierOne = MnMap();
+        tierTwo = MnMap();
         mnUniquePropertyMap = MnUniquePropertyMap();
         mnInternalIdMap = MnInternalIdMap();
 
@@ -232,6 +236,33 @@ public:
     [[nodiscard]] size_t GetAllMNsCount() const
     {
         return mnMap.size();
+    }
+
+    template <typename Callback>
+    void ForEachMNTierOne(bool onlyValid, Callback&& cb) const
+    {
+        for (const auto& p : tierOne) {
+            if (!onlyValid || IsMNValid(*p.second)) {
+                cb(p.second);
+            }
+        }
+    }
+    template <typename Callback>
+    void ForEachMNTierTwo(bool onlyValid, Callback&& cb) const
+    {
+        for (const auto& p : tierTwo) {
+            if (!onlyValid || IsMNValid(*p.second)) {
+                cb(p.second);
+            }
+        }
+    }
+
+    [[nodiscard]] size_t GetAllTierOneMNCount() const {
+        return tierOne.size();
+    }
+
+    [[nodiscard]] size_t GetAllTierTwoMNCount() const {
+        return tierTwo.size();
     }
 
     [[nodiscard]] size_t GetValidMNsCount() const
@@ -335,7 +366,7 @@ public:
     [[nodiscard]] CDeterministicMNCPtr GetValidMNByCollateral(const COutPoint& collateralOutpoint) const;
     [[nodiscard]] CDeterministicMNCPtr GetMNByService(const CService& service) const;
     [[nodiscard]] CDeterministicMNCPtr GetMNByInternalId(uint64_t internalId) const;
-    [[nodiscard]] CDeterministicMNCPtr GetMNPayee(const CBlockIndex* pIndex) const;
+    [[nodiscard]] CDeterministicMNCPtr GetMNPayee(bool isFullList, MnType type = MnType::Regular) const;
 
     /**
      * Calculates the projected MN payees for the next *count* blocks. The result is not guaranteed to be correct

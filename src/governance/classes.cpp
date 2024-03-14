@@ -450,16 +450,27 @@ CGovernanceObject* CSuperblock::GetGovernanceObject(CGovernanceManager& governan
 
 bool CSuperblock::IsValidBlockHeight(int nBlockHeight)
 {
+    int nSuperblockCycle;
+    if (nBlockHeight < Params().GetConsensus().nNewSuperBlockStartHeight) {
+        nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
+    } else {
+        nSuperblockCycle = Params().GetConsensus().nNewSuperBlockCycle;
+    }
     // SUPERBLOCKS CAN HAPPEN ONLY after hardfork and only ONCE PER CYCLE
     return nBlockHeight >= Params().GetConsensus().nSuperblockStartBlock &&
-           ((nBlockHeight % Params().GetConsensus().nSuperblockCycle) == 0);
+           ((nBlockHeight % nSuperblockCycle) == 0);
 }
 
 void CSuperblock::GetNearestSuperblocksHeights(int nBlockHeight, int& nLastSuperblockRet, int& nNextSuperblockRet)
 {
     const Consensus::Params& consensusParams = Params().GetConsensus();
     int nSuperblockStartBlock = consensusParams.nSuperblockStartBlock;
-    int nSuperblockCycle = consensusParams.nSuperblockCycle;
+    int nSuperblockCycle;
+    if (nBlockHeight < consensusParams.nNewSuperBlockStartHeight) {
+        nSuperblockCycle = consensusParams.nSuperblockCycle;
+    } else {
+        nSuperblockCycle = consensusParams.nNewSuperBlockCycle;
+    }
 
     // Get first superblock
     int nFirstSuperblockOffset = (nSuperblockCycle - nSuperblockStartBlock % nSuperblockCycle) % nSuperblockCycle;
@@ -482,11 +493,18 @@ CAmount CSuperblock::GetPaymentsLimit(int nBlockHeight)
         return 0;
     }
 
+    int nSuperblockCycle;
+    if (nBlockHeight < consensusParams.nNewSuperBlockStartHeight) {
+        nSuperblockCycle = consensusParams.nSuperblockCycle;
+    } else {
+        nSuperblockCycle = consensusParams.nNewSuperBlockCycle;
+    }
+
     // min subsidy for high diff networks and vice versa
     int nBits = consensusParams.fPowAllowMinDifficultyBlocks ? UintToArith256(consensusParams.powLimit).GetCompact() : 1;
     // some part of all blocks issued during the cycle goes to superblock, see GetBlockSubsidy
     CAmount nSuperblockPartOfSubsidy = GetBlockSubsidy(nBlockHeight - 1, consensusParams, true);
-    CAmount nPaymentsLimit = nSuperblockPartOfSubsidy * consensusParams.nSuperblockCycle;
+    CAmount nPaymentsLimit = nSuperblockPartOfSubsidy * nSuperblockCycle;
     LogPrint(BCLog::GOBJECT, "CSuperblock::GetPaymentsLimit -- Valid superblock height %d, payments max %lld\n", nBlockHeight, nPaymentsLimit);
 
     return nPaymentsLimit;
@@ -680,15 +698,21 @@ bool CSuperblock::IsExpired(const CGovernanceManager& governanceManager) const
     // Executed triggers are kept for another superblock cycle (approximately 1 month for mainnet).
     // Other valid triggers are kept for ~1 day only (for mainnet, but no longer than a superblock cycle for other networks).
     // Everything else is pruned after ~1h (for mainnet, but no longer than a superblock cycle for other networks).
+    int nSuperblockCycle;
+    if (::ChainActive().Height() < Params().GetConsensus().nNewSuperBlockStartHeight) {
+        nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
+    } else {
+        nSuperblockCycle = Params().GetConsensus().nNewSuperBlockCycle;
+    }
     switch (nStatus) {
     case SEEN_OBJECT_EXECUTED:
-        nExpirationBlocks = Params().GetConsensus().nSuperblockCycle;
+        nExpirationBlocks = nSuperblockCycle;
         break;
     case SEEN_OBJECT_IS_VALID:
-        nExpirationBlocks = std::min(576, Params().GetConsensus().nSuperblockCycle);
+        nExpirationBlocks = std::min(576, nSuperblockCycle);
         break;
     default:
-        nExpirationBlocks = std::min(24, Params().GetConsensus().nSuperblockCycle);
+        nExpirationBlocks = std::min(24, nSuperblockCycle);
         break;
     }
 

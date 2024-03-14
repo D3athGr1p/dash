@@ -177,38 +177,47 @@ static bool CompareByLastPaid(const CDeterministicMN* _a, const CDeterministicMN
     return CompareByLastPaid(*_a, *_b);
 }
 
-CDeterministicMNCPtr CDeterministicMNList::GetMNPayee(const CBlockIndex* pIndex) const
+CDeterministicMNCPtr CDeterministicMNList::GetMNPayee(bool isFullList, MnType type) const
 {
     if (mnMap.size() == 0) {
         return nullptr;
     }
 
-    bool isv19Active = llmq::utils::IsV19Active(pIndex);
-    // Starting from v19 and until v20 (Platform release), HPMN will be rewarded 4 blocks in a row
-    // TODO: Skip this code once v20 is active
-    CDeterministicMNCPtr best = nullptr;
-    if (isv19Active) {
-        ForEachMNShared(true, [&](const CDeterministicMNCPtr& dmn) {
-            if (dmn->pdmnState->nLastPaidHeight == nHeight) {
-                // We found the last MN Payee.
-                // If the last payee is a HPMN, we need to check its consecutive payments and pay him again if needed
-                if (dmn->nType == MnType::HighPerformance && dmn->pdmnState->nConsecutivePayments < dmn_types::HighPerformance.voting_weight) {
-                    best = dmn;
-                }
-            }
-        });
-
-        if (best != nullptr) return best;
-
-        // Note: If the last payee was a regular MN or if the payee is a HPMN that was removed from the mnList then that's fine.
-        // We can proceed with classic MN payee selection
+    if (type == MnType::Regular && tierOne.size() == 0) {
+        return nullptr;
     }
 
-    ForEachMNShared(true, [&](const CDeterministicMNCPtr& dmn) {
-        if (best == nullptr || CompareByLastPaid(dmn.get(), best.get())) {
-            best = dmn;
-        }
-    });
+    if (type == MnType::HighPerformance && tierTwo.size() == 0) {
+        return nullptr;
+    }
+
+    
+    CDeterministicMNCPtr best = nullptr;
+     if (isFullList) {
+        ForEachMNShared(true, [&](const CDeterministicMNCPtr& dmn) {
+            if (!best || CompareByLastPaid(*dmn, *best)) {
+                best = dmn;
+            }
+        });
+    } else if (type == MnType::Regular) {
+        ForEachMNTierOne(true, [&](const CDeterministicMNCPtr& dmn) {
+            if (!best || CompareByLastPaid(*dmn, *best)) {
+                best = dmn;
+            }
+        });
+    } else if (type == MnType::HighPerformance) {
+        ForEachMNTierTwo(true, [&](const CDeterministicMNCPtr& dmn) {
+            if (!best || CompareByLastPaid(*dmn, *best)) {
+                best = dmn;
+            }
+        });
+    } else {
+        ForEachMNShared(true, [&](const CDeterministicMNCPtr& dmn) {
+            if (!best || CompareByLastPaid(*dmn, *best)) {
+                best = dmn;
+            }
+        });
+    }
 
     return best;
 }
@@ -502,6 +511,12 @@ void CDeterministicMNList::AddMN(const CDeterministicMNCPtr& dmn, bool fBumpTota
         }
     }
 
+    if (dmn->nType == MnType::Regular) {
+        tierOne = tierOne.set(dmn->proTxHash, dmn);
+    } else {
+        tierTwo = tierTwo.set(dmn->proTxHash, dmn);
+    }
+
     mnMap = mnMap.set(dmn->proTxHash, dmn);
     mnInternalIdMap = mnInternalIdMap.set(dmn->GetInternalId(), dmn->proTxHash);
     if (fBumpTotalCount) {
@@ -540,6 +555,12 @@ void CDeterministicMNList::UpdateMN(const CDeterministicMN& oldDmn, const std::s
             throw(std::runtime_error(strprintf("%s: Can't update a masternode %s with a duplicate platformNodeID=%s", __func__,
                                                oldDmn.proTxHash.ToString(), pdmnState->platformNodeID.ToString())));
         }
+    }
+
+    if (dmn->nType == MnType::Regular) {
+        tierOne = tierOne.set(oldDmn.proTxHash, dmn);
+    } else {
+        tierTwo = tierTwo.set(oldDmn.proTxHash, dmn);
     }
 
     dmn->pdmnState = pdmnState;
@@ -601,6 +622,12 @@ void CDeterministicMNList::RemoveMN(const uint256& proTxHash)
             throw(std::runtime_error(strprintf("%s: Can't delete a masternode %s with a duplicate platformNodeID=%s", __func__,
                                                dmn->proTxHash.ToString(), dmn->pdmnState->platformNodeID.ToString())));
         }
+    }
+
+    if (dmn->nType == MnType::Regular) {
+        tierOne = tierOne.erase(proTxHash);
+    } else {
+        tierTwo = tierTwo.erase(proTxHash);
     }
 
     mnMap = mnMap.erase(proTxHash);
@@ -731,7 +758,14 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
     newList.SetBlockHash(uint256()); // we can't know the final block hash, so better not return a (invalid) block hash
     newList.SetHeight(nHeight);
 
-    auto payee = oldList.GetMNPayee(pindexPrev);
+    auto payee = oldList.GetMNPayee(false, MnType::Regular);
+    CDeterministicMNCPtr payee2;
+
+    bool isMnTierForkActivated = Params().GetConsensus().MNTierForkHeight <= nHeight;
+
+    if (isMnTierForkActivated) {
+        payee2 = oldList.GetMNPayee(false, MnType::HighPerformance);
+    }
 
     // we iterate the oldList here and update the newList
     // this is only valid as long these have not diverged at this point, which is the case as long as we don't add
@@ -768,7 +802,7 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
                 return _state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-protx-payload");
             }
 
-            if (proTx.nType == MnType::HighPerformance && !llmq::utils::IsV19Active(pindexPrev)) {
+            if (proTx.nType == MnType::HighPerformance && !isMnTierForkActivated) {
                 return _state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-protx-payload");
             }
 
@@ -831,7 +865,7 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
                 return _state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-protx-payload");
             }
 
-            if (proTx.nType == MnType::HighPerformance && !llmq::utils::IsV19Active(pindexPrev)) {
+            if (proTx.nType == MnType::HighPerformance && !isMnTierForkActivated) {
                 return _state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-protx-payload");
             }
 
@@ -970,39 +1004,17 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
         auto dmn = newList.GetMN(payee->proTxHash);
         auto newState = std::make_shared<CDeterministicMNState>(*dmn->pdmnState);
         newState->nLastPaidHeight = nHeight;
-        // Starting from v19 and until v20, HPMN will be paid 4 blocks in a row
-        // No need to check if v19 is active, since HPMN ProRegTx are allowed only after v19 activation
-        // TODO: Skip this code once v20 is active
-        // Note: If the payee wasn't found in the current block that's fine
-        if (dmn->nType == MnType::HighPerformance) {
-            ++newState->nConsecutivePayments;
-            if (debugLogs) {
-                LogPrint(BCLog::MNPAYMENTS, "CDeterministicMNManager::%s -- MN %s is a HPMN, bumping nConsecutivePayments to %d\n",
-                          __func__, dmn->proTxHash.ToString(), newState->nConsecutivePayments);
-            }
-        }
         newList.UpdateMN(payee->proTxHash, newState);
-        if (debugLogs) {
-            dmn = newList.GetMN(payee->proTxHash);
-            LogPrint(BCLog::MNPAYMENTS, "CDeterministicMNManager::%s -- MN %s, nConsecutivePayments=%d\n",
-                      __func__, dmn->proTxHash.ToString(), dmn->pdmnState->nConsecutivePayments);
-        }
     }
 
-    // reset nConsecutivePayments on non-paid HPMNs
-    auto newList2 = newList;
-    newList2.ForEachMN(false, [&](auto& dmn) {
-        if (payee != nullptr && dmn.proTxHash == payee->proTxHash) return;
-        if (dmn.nType != MnType::HighPerformance) return;
-        if (dmn.pdmnState->nConsecutivePayments == 0) return;
-        if (debugLogs) {
-            LogPrint(BCLog::MNPAYMENTS, "CDeterministicMNManager::%s -- MN %s, reset nConsecutivePayments %d->0\n",
-                      __func__, dmn.proTxHash.ToString(), dmn.pdmnState->nConsecutivePayments);
+     // reset nConsecutivePayments on non-paid EvoNodes
+    if (isMnTierForkActivated) {
+        if (payee2 && newList.HasMN(payee2->proTxHash)) {
+            auto newState = std::make_shared<CDeterministicMNState>(*newList.GetMN(payee2->proTxHash)->pdmnState);
+            newState->nLastPaidHeight = nHeight;
+            newList.UpdateMN(payee2->proTxHash, newState);
         }
-        auto newState = std::make_shared<CDeterministicMNState>(*dmn.pdmnState);
-        newState->nConsecutivePayments = 0;
-        newList.UpdateMN(dmn.proTxHash, newState);
-    });
+    }
 
     mnListRet = std::move(newList);
 
@@ -1522,11 +1534,11 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CValid
         return false;
     }
 
-    if (ptx.nType == MnType::HighPerformance) {
-        if (!CheckPlatformFields(ptx, state)) {
-            return false;
-        }
-    }
+    // if (ptx.nType == MnType::HighPerformance) {
+    //     if (!CheckPlatformFields(ptx, state)) {
+    //         return false;
+    //     }
+    // }
 
     CTxDestination collateralTxDest;
     const PKHash *keyForPayloadSig = nullptr;
@@ -1640,11 +1652,11 @@ bool CheckProUpServTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVa
         return false;
     }
 
-    if (ptx.nType == MnType::HighPerformance) {
-        if (!CheckPlatformFields(ptx, state)) {
-            return false;
-        }
-    }
+    // if (ptx.nType == MnType::HighPerformance) {
+    //     if (!CheckPlatformFields(ptx, state)) {
+    //         return false;
+    //     }
+    // }
 
     if (pindexPrev) {
         auto mnList = deterministicMNManager->GetListForBlock(pindexPrev);

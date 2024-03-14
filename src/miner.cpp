@@ -63,7 +63,7 @@ void BlockAssembler::FillFoundersReward(CMutableTransaction& coinbaseTx, int nHe
 
     if(nHeight > 18000 && nHeight <= 24000) {
         devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * 18) / 100;
-    } else if (nHeight <= 87500) {
+    } else if (nHeight <= params.V3ForkHeight) {
         devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * params.DevelopementFundShare) / 100;
     } else {
         devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * (300.0/95.0)) / 100;
@@ -71,6 +71,11 @@ void BlockAssembler::FillFoundersReward(CMutableTransaction& coinbaseTx, int nHe
 
     coinbaseTx.vout[0].nValue -= devPayoutValue;
     coinbaseTx.vout.push_back(CTxOut(devPayoutValue, devPayoutScript));
+
+    if (isExtraFundAllocationHeight(nHeight)) {
+        CAmount amount = GetExtraPayOutAmount(nHeight);
+        coinbaseTx.vout.push_back(CTxOut(amount, GetScriptForDestination(DecodeDestination(params.ExtraPayoutAddress))));
+    }
 }
 
 BlockAssembler::Options::Options() {
