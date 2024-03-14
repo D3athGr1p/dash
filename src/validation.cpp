@@ -1007,52 +1007,89 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
         might be a good idea to change this to use prev bits
         but current height to avoid confusion.
 */
-CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
+CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
-    double dDiff;
     CAmount nSubsidyBase;
 
-    if (nPrevHeight <= 4500 && Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        /* a bug which caused diff to not be correctly calculated */
-        dDiff = (double)0x0000ffff / (double)(nPrevBits & 0x00ffffff);
+    if (nPrevHeight == 0) {
+        nSubsidyBase = 3000000;
+    } else if (nPrevHeight <= 6000 ) {
+        nSubsidyBase = 2000;
+    } else if (nPrevHeight <= 14000) {
+        nSubsidyBase = 1000;
+    } else if (nPrevHeight <= 24000) {
+        nSubsidyBase = 800;
+    } else if (nPrevHeight <= 44000) {
+        nSubsidyBase = 600;
+    } else if (nPrevHeight <= 74000) {
+        nSubsidyBase = 400;
+    } else if (nPrevHeight <= 87500) {
+        nSubsidyBase = 300;
+    } else if (nPrevHeight <= 172000) {
+        nSubsidyBase = 150;
+    } else if (nPrevHeight <= 316000) {
+        nSubsidyBase = 120;
+    } else if (nPrevHeight <= 460000) {
+        nSubsidyBase = 100;
+    } else if (nPrevHeight <= 604000) {
+        nSubsidyBase = 80;
+    } else if (nPrevHeight <= 748000) {
+        nSubsidyBase = 65;
+    } else if (nPrevHeight <= 892000) {
+        nSubsidyBase = 50;
+    } else if (nPrevHeight <= 1036000) {
+        nSubsidyBase = 40;
+    } else if (nPrevHeight <= 1180000) {
+        nSubsidyBase = 30;
+    } else if (nPrevHeight <= 1324000) {
+        nSubsidyBase = 25;
+    } else if (nPrevHeight <= 1468000) {
+        nSubsidyBase = 20;
+    } else if (nPrevHeight <= 1612000) {
+        nSubsidyBase = 15;
+    } else if (nPrevHeight <= 1756000) {
+        nSubsidyBase = 12;
+    } else if (nPrevHeight <= 1900000) {
+        nSubsidyBase = 10;
+    } else if (nPrevHeight <= 2044000) {
+        nSubsidyBase = 9;
+    } else if (nPrevHeight <= 2188000) {
+        nSubsidyBase = 8;
+    } else if (nPrevHeight <= 2332000) {
+        nSubsidyBase = 7;
+    } else if (nPrevHeight <= 2476000) {
+        nSubsidyBase = 6;
+    } else if (nPrevHeight <= 2620000) {
+        nSubsidyBase = 5;
+    } else if (nPrevHeight <= 2764000) {
+        nSubsidyBase = 4;
+    } else if (nPrevHeight <= 2908000) {
+        nSubsidyBase = 3;
+    } else if (nPrevHeight <= 3052000) {
+        nSubsidyBase = 2;
+    } else if (nPrevHeight <= 3196000) {
+        nSubsidyBase = 1;
+    } else if (nPrevHeight <= 3340000) {
+        nSubsidyBase = 0.5;
+    } else if (nPrevHeight <= 3648000) {
+        nSubsidyBase = 0.25;
     } else {
-        dDiff = ConvertBitsToDouble(nPrevBits);
-    }
-
-    if (nPrevHeight < 5465) {
-        // Early ages...
-        // 1111/((x+1)^2)
-        nSubsidyBase = (1111.0 / (pow((dDiff+1.0),2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 1) nSubsidyBase = 1;
-    } else if (nPrevHeight < 17000 || (dDiff <= 75 && nPrevHeight < 24000)) {
-        // CPU mining era
-        // 11111/(((x+51)/6)^2)
-        nSubsidyBase = (11111.0 / (pow((dDiff+51.0)/6.0,2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 25) nSubsidyBase = 25;
-    } else {
-        // GPU/ASIC mining era
-        // 2222222/(((x+2600)/9)^2)
-        nSubsidyBase = (2222222.0 / (pow((dDiff+2600.0)/9.0,2.0)));
-        if(nSubsidyBase > 25) nSubsidyBase = 25;
-        else if(nSubsidyBase < 5) nSubsidyBase = 5;
+	    nSubsidyBase = 0;
     }
 
     CAmount nSubsidy = nSubsidyBase * COIN;
-
-    // yearly decline of production by ~7.1% per year, projected ~18M coins max by year 2050+.
-    for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
-        nSubsidy -= nSubsidy/14;
-    }
 
     // this is only active on devnets
     if (nPrevHeight < consensusParams.nHighSubsidyBlocks) {
         nSubsidy *= consensusParams.nHighSubsidyFactor;
     }
 
-    // Hard fork to reduce the block reward by 10 extra percent (allowing budget/superblocks)
-    CAmount nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy/10 : 0;
+    CAmount nSuperblockPart; 
+    if (nPrevHeight < 16700) {
+        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
+    } else {
+        nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
+    }
 
     return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
 }
@@ -2355,7 +2392,7 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     // DASH : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
 
     // TODO: resync data (both ways?) and try to reprocess this block later.
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev->nBits, pindex->pprev->nHeight, chainparams.GetConsensus());
+    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev->nHeight, chainparams.GetConsensus());
     std::string strError = "";
 
     int64_t nTime5_2 = GetTimeMicros(); nTimeSubsidy += nTime5_2 - nTime5_1;
