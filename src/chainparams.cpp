@@ -166,6 +166,8 @@ public:
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 20
         consensus.nPowTargetTimespan = 9 * 60 * 60; // Dash: 1 day
         consensus.nPowTargetSpacing = 3 * 60; // Dash: 2.5 minutes
+        consensus.nNewPowTargetSpacing = 90;
+        consensus.nNewPowTargetSpacingForkHeight = 87600;
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nPowKGWHeight = 1;
