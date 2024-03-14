@@ -114,6 +114,8 @@ struct Params {
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
+    int DevelopementFundShare;
+    int DevRewardStartHeight;
     std::string DevelopmentFundAddress;
 
     int64_t GetCurrentPowTargetSpacing(const int& nHeight) const
