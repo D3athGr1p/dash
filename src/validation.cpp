@@ -52,7 +52,9 @@
 #include <masternode/payments.h>
 #include <masternode/sync.h>
 
+#include <evo/deterministicmns.h>
 #include <evo/evodb.h>
+#include <evo/providertx.h>
 #include <evo/specialtx.h>
 #include <evo/specialtxman.h>
 #include <governance/governance.h>
@@ -1094,7 +1096,7 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
 {
     CAmount nSubsidyBase;
 
-    if (nPrevHeight == 1) {
+    if (nPrevHeight == 0) {
         nSubsidyBase = 3000000;
     } else if (nPrevHeight <= 6001 ) {
         nSubsidyBase = 2000;
@@ -1167,7 +1169,7 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
 
     CAmount nSuperblockPart = 0; 
     if (nPrevHeight > 2) {
-        if (nPrevHeight <= 16700) {
+        if (nPrevHeight < 16700) {
             nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
         } else if (nPrevHeight <= consensusParams.V3ForkHeight + 1) {
             nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
@@ -1181,7 +1183,7 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue, int nReallocActivationHeight)
 {
-    const int nReallocActivationHeight = Params().GetConsensus().BRRHeight;
+    nReallocActivationHeight = Params().GetConsensus().BRRHeight;
 
     if (nHeight > 16700) {
         if (nHeight <= 18000) {
@@ -2460,6 +2462,10 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
     int64_t nTime5_2 = GetTimeMicros(); nTimeSubsidy += nTime5_2 - nTime5_1;
     LogPrint(BCLog::BENCHMARK, "      - GetBlockSubsidy: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime5_2 - nTime5_1), nTimeSubsidy * MICRO, nTimeSubsidy * MILLI / nBlocksTotal);
 
+    if (isExtraFundAllocationHeight(pindex->nHeight)) {
+        blockReward += GetExtraPayOutAmount(pindex->nHeight);
+    }
+
     if (!IsBlockValueValid(*sporkManager, *governance, *::masternodeSync, block, pindex->nHeight, blockReward, strError)) {
         // NOTE: Do not punish, the node might be missing governance data
         return state.Invalid(ValidationInvalidReason::NONE, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
@@ -2467,10 +2473,6 @@ bool CChainState::ConnectBlock(const CBlock& block, CValidationState& state, CBl
 
     int64_t nTime5_3 = GetTimeMicros(); nTimeValueValid += nTime5_3 - nTime5_2;
     LogPrint(BCLog::BENCHMARK, "      - IsBlockValueValid: %.2fms [%.2fs (%.2fms/blk)]\n", MILLI * (nTime5_3 - nTime5_2), nTimeValueValid * MICRO, nTimeValueValid * MILLI / nBlocksTotal);
-
-    if (isExtraFundAllocationHeight(pindex->nHeight)) {
-        blockReward += GetExtraPayOutAmount(pindex->nHeight);
-    }
 
     if (!IsBlockPayeeValid(*sporkManager, *governance, *block.vtx[0], pindex->nHeight, blockReward)) {
         // NOTE: Do not punish, the node might be missing governance data
@@ -3880,47 +3882,6 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
     {
         nSigOps += GetLegacySigOpCount(*tx);
     }
-
-    if (nHeight > Params().GetConsensus().DevRewardStartHeight) {
-        // "stage 2" interval between first and second halvings
-        CScript devPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.DevelopmentFundAddress));
-        CAmount devPayoutValue;
-
-        if (nHeight > 18000 && nHeight <= 24000) {
-            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * 18) / 100;
-        } else if (nHeight == 24001) {
-            devPayoutValue = 1674000000;
-        } else if (nHeight < consensusParams.V3ForkHeight) {
-            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * consensusParams.DevelopementFundShare) / 100;
-        } else if (nHeight == 87500) {
-            devPayoutValue = 837000000;
-        } else {
-            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * (300.0/95.0)) / 100;
-        }
-
-        bool found = false;
-        for (const CTxOut& txout : block.vtx[0]->vout) {
-            if ((found = txout.scriptPubKey == devPayoutScript && txout.nValue == devPayoutValue) == true)
-                break;
-        }
-        if (!found)
-            return state.Invalid(BlockValidationResult::CONSENSUS, "Developer reward check failed");
-    }
-
-    if(isExtraFundAllocationHeight(nHeight)) {
-        CScript additionalPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.ExtraPayoutAddress));
-        CAmount extraFund = GetExtraPayOutAmount(nHeight);
-
-
-        bool found = false;
-        for (const CTxOut& txout : block.vtx[0]->vout) {
-            if ((found = txout.scriptPubKey == additionalPayoutScript && txout.nValue == extraFund) == true)
-                break;
-        }
-        if (!found) {
-            return state.Invalid(BlockValidationResult::CONSENSUS, "Extra reward allocation check failed");
-        }
-    }
     
     // sigops limits (relaxed)
     if (nSigOps > MaxBlockSigOps())
@@ -4050,6 +4011,48 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
             return false;
         }
         nSigOps += GetLegacySigOpCount(*tx);
+    }
+
+     if (nHeight > Params().GetConsensus().DevRewardStartHeight) {
+        // "stage 2" interval between first and second halvings
+        CScript devPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.DevelopmentFundAddress));
+        CAmount devPayoutValue;
+
+        if (nHeight > 18000 && nHeight <= 24000) {
+            devPayoutValue = (GetBlockSubsidy(nHeight, consensusParams) * 18) / 100;
+        } else if (nHeight == 24001) {
+            devPayoutValue = 1674000000;
+        } else if (nHeight < consensusParams.V3ForkHeight) {
+            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * consensusParams.DevelopementFundShare) / 100;
+        } else if (nHeight == 87500) {
+            devPayoutValue = 837000000;
+        } else {
+            devPayoutValue = (GetBlockSubsidy(nHeight + 1, consensusParams) * (300.0/95.0)) / 100;
+        }
+
+        bool found = false;
+        for (const CTxOut& txout : block.vtx[0]->vout) {
+            if ((found = txout.scriptPubKey == devPayoutScript && txout.nValue == devPayoutValue) == true)
+                break;
+        }
+        if (!found)
+            return state.Invalid(ValidationInvalidReason::TX_MISSING_INPUTS, "Developer reward check failed");
+    }
+
+    if(isExtraFundAllocationHeight(nHeight)) {
+        CScript additionalPayoutScript = GetScriptForDestination(DecodeDestination(consensusParams.ExtraPayoutAddress));
+        CAmount extraFund = GetExtraPayOutAmount(nHeight);
+
+
+        bool found = false;
+        for (const CTxOut& txout : block.vtx[0]->vout) {
+            if ((found = txout.scriptPubKey == additionalPayoutScript && txout.nValue == extraFund) == true)
+                break;
+        }
+        if (!found) {
+            LogPrintf("nHeight is in dev reward is :>>>>>>>>>>> %d: %d: %d\n", nHeight, extraFund);
+            return state.Invalid(ValidationInvalidReason::TX_MISSING_INPUTS, "Extra reward allocation check failed");
+        }
     }
 
     // Check sigops

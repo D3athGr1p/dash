@@ -880,7 +880,7 @@ void CGovernanceManager::CheckPostponedObjects(CConnman& connman)
     // Perform additional relays for triggers
     int64_t nNow = GetAdjustedTime();
     int nSuperblockCycle;
-     (::ChainActive().Height() < Params().GetConsensus().nNewSuperBlockStartHeight) {
+    if (::ChainActive().Height() < Params().GetConsensus().nNewSuperBlockStartHeight) {
         nSuperblockCycle = Params().GetConsensus().nSuperblockCycle;
     } else {
         nSuperblockCycle = Params().GetConsensus().nNewSuperBlockCycle;

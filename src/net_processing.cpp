@@ -648,7 +648,7 @@ static bool TipMayBeStale(const Consensus::Params &consensusParams) EXCLUSIVE_LO
 
 static bool CanDirectFetch(const Consensus::Params &consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    int64_t blockTime = consensusParams.GetCurrentPowTargetSpacing(m_chainman.ActiveChain().Tip()->nHeight);
+    int64_t blockTime = consensusParams.GetCurrentPowTargetSpacing(::ChainActive().Tip()->nHeight);
     return ::ChainActive().Tip()->GetBlockTime() > GetAdjustedTime() - blockTime * 20;
 }
 
@@ -4890,7 +4890,7 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         if (state.vBlocksInFlight.size() > 0) {
             QueuedBlock &queuedBlock = state.vBlocksInFlight.front();
             int nOtherPeersWithValidatedDownloads = nPeersWithValidatedDownloads - (state.nBlocksInFlightValidHeaders > 0);
-            int64_t blockTime = consensusParams.GetCurrentPowTargetSpacing(m_chainman.ActiveChain().Tip()->nHeight + 1);
+            int64_t blockTime = consensusParams.GetCurrentPowTargetSpacing(::ChainActive().Tip()->nHeight + 1);
             if (nNow > state.nDownloadingSince + consensusParams.nPowTargetSpacing * (BLOCK_DOWNLOAD_TIMEOUT_BASE + BLOCK_DOWNLOAD_TIMEOUT_PER_PEER * nOtherPeersWithValidatedDownloads)) {
                 LogPrintf("Timeout downloading block %s from peer=%d, disconnecting\n", queuedBlock.hash.ToString(), pto->GetId());
                 pto->fDisconnect = true;
