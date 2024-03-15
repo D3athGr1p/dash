@@ -202,8 +202,8 @@ void SendCoinsDialog::setModel(WalletModel *_model)
 
         // fee section
         for (const int n : confTargets) {
-            int64_t blockTime = Params().GetConsensus().GetCurrentPowTargetSpacing(::ChainActive()->nHeight);
-            // int64_t blockTime = Params().GetConsensus().nPowTargetSpacing;
+            // int64_t blockTime = Params().GetConsensus().GetCurrentPowTargetSpacing(::ChainActive()->nHeight);
+            int64_t blockTime = Params().GetConsensus().nPowTargetSpacing;
             ui->confTargetSelector->addItem(tr("%1 (%2 blocks)").arg(GUIUtil::formatNiceTimeOffset(n*blockTime)).arg(n));
         }
         connect(ui->confTargetSelector, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &SendCoinsDialog::updateSmartFeeLabel);

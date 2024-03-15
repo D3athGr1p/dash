@@ -539,7 +539,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         CProUpServTx proTx;
         if (GetTxPayload(tx, proTx)) {
             auto dmn = deterministicMNManager->GetListAtChainTip().GetMN(proTx.proTxHash);
-            if (dmn->nType == MnType::Evo) {
+            if (dmn->nType == MnType::HighPerformance) {
                 return false;
             }
         }
@@ -1098,23 +1098,23 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
 
     if (nPrevHeight == 0) {
         nSubsidyBase = 3000000;
-    } else if (nPrevHeight <= 6001 ) {
+    } else if (nPrevHeight <= 6000 ) {
         nSubsidyBase = 2000;
-    } else if (nPrevHeight <= 14001) {
+    } else if (nPrevHeight <= 14000) {
         nSubsidyBase = 1000;
-    } else if (nPrevHeight <= 24001) {
+    } else if (nPrevHeight <= 24000) {
         nSubsidyBase = 800;
-    } else if (nPrevHeight <= 44001) {
+    } else if (nPrevHeight <= 44000) {
         nSubsidyBase = 600;
-    } else if (nPrevHeight <= 74001) {
+    } else if (nPrevHeight <= 74000) {
         nSubsidyBase = 400;
-    } else if (nPrevHeight <= 87501) {
+    } else if (nPrevHeight <= 87500) {
         nSubsidyBase = 300;
-    } else if (nPrevHeight <= 172001) {
+    } else if (nPrevHeight <= 172000) {
         nSubsidyBase = 150;
-    } else if (nPrevHeight <= 316001) {
+    } else if (nPrevHeight <= 316000) {
         nSubsidyBase = 120;
-    } else if (nPrevHeight <= 460001) {
+    } else if (nPrevHeight <= 460000) {
         nSubsidyBase = 100;
     } else if (nPrevHeight <= 604000) {
         nSubsidyBase = 80;
@@ -1171,7 +1171,7 @@ CAmount GetBlockSubsidy(int nPrevHeight, const Consensus::Params& consensusParam
     if (nPrevHeight > 2) {
         if (nPrevHeight < 16700) {
             nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;    
-        } else if (nPrevHeight <= consensusParams.V3ForkHeight + 1) {
+        } else if (nPrevHeight <= consensusParams.V3ForkHeight) {
             nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.07 : 0;
         } else {
             nSuperblockPart = (nPrevHeight > consensusParams.nBudgetPaymentsStartBlock) ? nSubsidy * 0.05 : 0;
