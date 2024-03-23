@@ -503,13 +503,13 @@ void CDeterministicMNList::AddMN(const CDeterministicMNCPtr& dmn, bool fBumpTota
                 dmn->proTxHash.ToString(), dmn->pdmnState->pubKeyOperator.ToString())));
     }
 
-    if (dmn->nType == MnType::HighPerformance) {
-        if (dmn->pdmnState->platformNodeID != uint160() && !AddUniqueProperty(*dmn, dmn->pdmnState->platformNodeID)) {
-            mnUniquePropertyMap = mnUniquePropertyMapSaved;
-            throw(std::runtime_error(strprintf("%s: Can't add a masternode %s with a duplicate platformNodeID=%s", __func__,
-                                               dmn->proTxHash.ToString(), dmn->pdmnState->platformNodeID.ToString())));
-        }
-    }
+    // if (dmn->nType == MnType::HighPerformance) {
+    //     if (dmn->pdmnState->platformNodeID != uint160() && !AddUniqueProperty(*dmn, dmn->pdmnState->platformNodeID)) {
+    //         mnUniquePropertyMap = mnUniquePropertyMapSaved;
+    //         throw(std::runtime_error(strprintf("%s: Can't add a masternode %s with a duplicate platformNodeID=%s", __func__,
+    //                                            dmn->proTxHash.ToString(), dmn->pdmnState->platformNodeID.ToString())));
+    //     }
+    // }
 
     if (dmn->nType == MnType::Regular) {
         tierOne = tierOne.set(dmn->proTxHash, dmn);
@@ -549,13 +549,13 @@ void CDeterministicMNList::UpdateMN(const CDeterministicMN& oldDmn, const std::s
         throw(std::runtime_error(strprintf("%s: Can't update a masternode %s with a duplicate pubKeyOperator=%s", __func__,
                 oldDmn.proTxHash.ToString(), pdmnState->pubKeyOperator.ToString())));
     }
-    if (dmn->nType == MnType::HighPerformance) {
-        if (!UpdateUniqueProperty(*dmn, oldState->platformNodeID, pdmnState->platformNodeID)) {
-            mnUniquePropertyMap = mnUniquePropertyMapSaved;
-            throw(std::runtime_error(strprintf("%s: Can't update a masternode %s with a duplicate platformNodeID=%s", __func__,
-                                               oldDmn.proTxHash.ToString(), pdmnState->platformNodeID.ToString())));
-        }
-    }
+    // if (dmn->nType == MnType::HighPerformance) {
+    //     if (!UpdateUniqueProperty(*dmn, oldState->platformNodeID, pdmnState->platformNodeID)) {
+    //         mnUniquePropertyMap = mnUniquePropertyMapSaved;
+    //         throw(std::runtime_error(strprintf("%s: Can't update a masternode %s with a duplicate platformNodeID=%s", __func__,
+    //                                            oldDmn.proTxHash.ToString(), pdmnState->platformNodeID.ToString())));
+    //     }
+    // }
 
     if (dmn->nType == MnType::Regular) {
         tierOne = tierOne.set(oldDmn.proTxHash, dmn);
@@ -616,13 +616,13 @@ void CDeterministicMNList::RemoveMN(const uint256& proTxHash)
                 proTxHash.ToString(), dmn->pdmnState->pubKeyOperator.ToString())));
     }
 
-    if (dmn->nType == MnType::HighPerformance) {
-        if (dmn->pdmnState->platformNodeID != uint160() && !DeleteUniqueProperty(*dmn, dmn->pdmnState->platformNodeID)) {
-            mnUniquePropertyMap = mnUniquePropertyMapSaved;
-            throw(std::runtime_error(strprintf("%s: Can't delete a masternode %s with a duplicate platformNodeID=%s", __func__,
-                                               dmn->proTxHash.ToString(), dmn->pdmnState->platformNodeID.ToString())));
-        }
-    }
+    // if (dmn->nType == MnType::HighPerformance) {
+    //     if (dmn->pdmnState->platformNodeID != uint160() && !DeleteUniqueProperty(*dmn, dmn->pdmnState->platformNodeID)) {
+    //         mnUniquePropertyMap = mnUniquePropertyMapSaved;
+    //         throw(std::runtime_error(strprintf("%s: Can't delete a masternode %s with a duplicate platformNodeID=%s", __func__,
+    //                                            dmn->proTxHash.ToString(), dmn->pdmnState->platformNodeID.ToString())));
+    //     }
+    // }
 
     if (dmn->nType == MnType::Regular) {
         tierOne = tierOne.erase(proTxHash);
@@ -887,11 +887,11 @@ bool CDeterministicMNManager::BuildNewListFromBlock(const CBlock& block, const C
             auto newState = std::make_shared<CDeterministicMNState>(*dmn->pdmnState);
             newState->addr = proTx.addr;
             newState->scriptOperatorPayout = proTx.scriptOperatorPayout;
-            if (proTx.nType == MnType::HighPerformance) {
-                newState->platformNodeID = proTx.platformNodeID;
-                newState->platformP2PPort = proTx.platformP2PPort;
-                newState->platformHTTPPort = proTx.platformHTTPPort;
-            }
+            // if (proTx.nType == MnType::HighPerformance) {
+            //     newState->platformNodeID = proTx.platformNodeID;
+            //     newState->platformP2PPort = proTx.platformP2PPort;
+            //     newState->platformHTTPPort = proTx.platformHTTPPort;
+            // }
             if (newState->IsBanned()) {
                 // only revive when all keys are set
                 if (newState->pubKeyOperator.Get().IsValid() && !newState->keyIDVoting.IsNull() && !newState->keyIDOwner.IsNull()) {
@@ -1599,11 +1599,11 @@ bool CheckProRegTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CValid
         }
 
         // never allow duplicate platformNodeIds for HPMNs
-        if (ptx.nType == MnType::HighPerformance) {
-            if (mnList.HasUniqueProperty(ptx.platformNodeID)) {
-                return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_DUPLICATE, "bad-protx-dup-platformnodeid");
-            }
-        }
+        // if (ptx.nType == MnType::HighPerformance) {
+        //     if (mnList.HasUniqueProperty(ptx.platformNodeID)) {
+        //         return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_DUPLICATE, "bad-protx-dup-platformnodeid");
+        //     }
+        // }
 
         if (!deterministicMNManager->IsDIP3Enforced(pindexPrev->nHeight)) {
             if (ptx.keyIDOwner != ptx.keyIDVoting) {
@@ -1671,11 +1671,11 @@ bool CheckProUpServTx(const CTransaction& tx, const CBlockIndex* pindexPrev, CVa
         }
 
         // don't allow updating to platformNodeIds already used by other HPMNs
-        if (ptx.nType == MnType::HighPerformance) {
-            if (mnList.HasUniqueProperty(ptx.platformNodeID)  && mnList.GetUniquePropertyMN(ptx.platformNodeID)->proTxHash != ptx.proTxHash) {
-                return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_DUPLICATE, "bad-protx-dup-platformnodeid");
-            }
-        }
+        // if (ptx.nType == MnType::HighPerformance) {
+        //     if (mnList.HasUniqueProperty(ptx.platformNodeID)  && mnList.GetUniquePropertyMN(ptx.platformNodeID)->proTxHash != ptx.proTxHash) {
+        //         return state.Invalid(ValidationInvalidReason::TX_BAD_SPECIAL, false, REJECT_DUPLICATE, "bad-protx-dup-platformnodeid");
+        //     }
+        // }
 
         if (ptx.scriptOperatorPayout != CScript()) {
             if (mn->nOperatorReward == 0) {

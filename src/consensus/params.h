@@ -121,7 +121,6 @@ struct Params {
     std::string ExtraPayoutAddress;
     /** Block height at which MNTier fork becomes enforced*/
     int MNTierForkHeight;
-    int RegularNodePercentage;
     int V3ForkHeight;
     std::string DevelopmentFundAddress;
 

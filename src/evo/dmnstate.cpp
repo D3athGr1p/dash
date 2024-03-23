@@ -47,11 +47,11 @@ void CDeterministicMNState::ToJson(UniValue& obj, MnType nType) const
     obj.pushKV("revocationReason", nRevocationReason);
     obj.pushKV("ownerAddress", EncodeDestination(PKHash(keyIDOwner)));
     obj.pushKV("votingAddress", EncodeDestination(PKHash(keyIDVoting)));
-    if (nType == MnType::HighPerformance) {
-        obj.pushKV("platformNodeID", platformNodeID.ToString());
-        obj.pushKV("platformP2PPort", platformP2PPort);
-        obj.pushKV("platformHTTPPort", platformHTTPPort);
-    }
+    // if (nType == MnType::HighPerformance) {
+    //     obj.pushKV("platformNodeID", platformNodeID.ToString());
+    //     obj.pushKV("platformP2PPort", platformP2PPort);
+    //     obj.pushKV("platformHTTPPort", platformHTTPPort);
+    // }
 
     CTxDestination dest;
     if (ExtractDestination(scriptPayout, dest)) {

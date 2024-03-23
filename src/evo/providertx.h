@@ -71,12 +71,12 @@ public:
                 obj.scriptPayout,
                 obj.inputsHash
         );
-        if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
             // READWRITE(
             //     obj.platformNodeID,
             //     obj.platformP2PPort,
             //     obj.platformHTTPPort);
-        }
+        // }
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(obj.vchSig);
         }
@@ -106,11 +106,11 @@ public:
         }
         obj.pushKV("pubKeyOperator", pubKeyOperator.ToString());
         obj.pushKV("operatorReward", (double)nOperatorReward / 100);
-        if (nType == MnType::HighPerformance) {
-            obj.pushKV("platformNodeID", platformNodeID.ToString());
-            obj.pushKV("platformP2PPort", platformP2PPort);
-            obj.pushKV("platformHTTPPort", platformHTTPPort);
-        }
+        // if (nType == MnType::HighPerformance) {
+        //     obj.pushKV("platformNodeID", platformNodeID.ToString());
+        //     obj.pushKV("platformP2PPort", platformP2PPort);
+        //     obj.pushKV("platformHTTPPort", platformHTTPPort);
+        // }
         obj.pushKV("inputsHash", inputsHash.ToString());
     }
 
@@ -159,12 +159,12 @@ public:
                 obj.scriptOperatorPayout,
                 obj.inputsHash
         );
-        if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
-            READWRITE(
-                obj.platformNodeID,
-                obj.platformP2PPort,
-                obj.platformHTTPPort);
-        }
+        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+        //     READWRITE(
+        //         obj.platformNodeID,
+        //         obj.platformP2PPort,
+        //         obj.platformHTTPPort);
+        // }
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(
                     CBLSSignatureVersionWrapper(const_cast<CBLSSignature&>(obj.sig), (obj.nVersion == LEGACY_BLS_VERSION), true)
@@ -186,11 +186,11 @@ public:
         if (ExtractDestination(scriptOperatorPayout, dest)) {
             obj.pushKV("operatorPayoutAddress", EncodeDestination(dest));
         }
-        if (nType == MnType::HighPerformance) {
-            obj.pushKV("platformNodeID", platformNodeID.ToString());
-            obj.pushKV("platformP2PPort", platformP2PPort);
-            obj.pushKV("platformHTTPPort", platformHTTPPort);
-        }
+        // if (nType == MnType::HighPerformance) {
+        //     obj.pushKV("platformNodeID", platformNodeID.ToString());
+        //     obj.pushKV("platformP2PPort", platformP2PPort);
+        //     obj.pushKV("platformHTTPPort", platformHTTPPort);
+        // }
         obj.pushKV("inputsHash", inputsHash.ToString());
     }
 
