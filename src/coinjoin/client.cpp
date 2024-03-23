@@ -37,6 +37,11 @@ void CCoinJoinClientQueueManager::ProcessMessage(const CNode& peer, std::string_
     if (fMasternodeMode) return;
     if (!m_mn_sync->IsBlockchainSynced()) return;
 
+    if (peer.nVersion >= DISABLE_COINJOIN_PROTO_VERSION) {
+        LogPrint(BCLog::COINJOIN, "DSQUEUE -- peer=%d using obsolete version %i\n", peer.GetId(), peer.nVersion);
+        return;
+    }
+
     if (msg_type == NetMsgType::DSQUEUE) {
         CCoinJoinClientQueueManager::ProcessDSQueue(peer, vRecv);
     }
@@ -159,6 +164,7 @@ void CCoinJoinClientSession::ProcessMessage(CNode& peer, CConnman& connman, cons
     if (!m_mn_sync->IsBlockchainSynced()) return;
 
     if (msg_type == NetMsgType::DSSTATUSUPDATE) {
+        if (peer.nVersion >= DISABLE_COINJOIN_PROTO_VERSION) return;
         if (!mixingMasternode) return;
         if (mixingMasternode->pdmnState->addr != peer.addr) {
             return;
@@ -170,6 +176,7 @@ void CCoinJoinClientSession::ProcessMessage(CNode& peer, CConnman& connman, cons
         ProcessPoolStateUpdate(psssup);
 
     } else if (msg_type == NetMsgType::DSFINALTX) {
+        if (peer.nVersion >= DISABLE_COINJOIN_PROTO_VERSION) return;
         if (!mixingMasternode) return;
         if (mixingMasternode->pdmnState->addr != peer.addr) {
             return;
@@ -190,6 +197,7 @@ void CCoinJoinClientSession::ProcessMessage(CNode& peer, CConnman& connman, cons
         SignFinalTransaction(mempool, txNew, peer, connman);
 
     } else if (msg_type == NetMsgType::DSCOMPLETE) {
+        if (peer.nVersion >= DISABLE_COINJOIN_PROTO_VERSION) return;
         if (!mixingMasternode) return;
         if (mixingMasternode->pdmnState->addr != peer.addr) {
             LogPrint(BCLog::COINJOIN, "DSCOMPLETE -- message doesn't match current Masternode: infoMixingMasternode=%s  addr=%s\n", mixingMasternode->pdmnState->addr.ToString(), peer.addr.ToString());
@@ -616,7 +624,7 @@ bool CCoinJoinClientSession::SignFinalTransaction(const CTxMemPool& mempool, con
             }
 
             LogPrint(BCLog::COINJOIN, "CCoinJoinClientSession::%s -- Signing my input %i\n", __func__, nMyInputIndex);
-            // TODO we're using amount=0 here but we should use the correct amount. This works because Dash ignores the amount while signing/verifying (only used in Bitcoin/Segwit)
+            // TODO we're using amount=0 here but we should use the correct amount. This works because BLOCX ignores the amount while signing/verifying (only used in Bitcoin/Segwit)
             if (!SignSignature(*mixingWallet.GetSigningProvider(prevPubKey), prevPubKey, finalMutableTransaction, nMyInputIndex, 0, int(SIGHASH_ALL | SIGHASH_ANYONECANPAY))) { // changes scriptSig
                 LogPrint(BCLog::COINJOIN, "CCoinJoinClientSession::%s -- Unable to sign my own transaction!\n", __func__);
                 // not sure what to do here, it will time out...?

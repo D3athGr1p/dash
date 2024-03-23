@@ -902,7 +902,7 @@ QToolBar > QToolButton:disabled {
 
 QToolBar QLabel#lblToolbarLogo {
     padding: 12px;
-    image: url(':/images/dash_logo_toolbar');
+    image: url(':/images/blocx_logo_toolbar');
     height: 2.5em;
 }
 
@@ -991,11 +991,11 @@ AboutDialog
 
 QDialog#AboutDialog QLabel#label,
 QDialog#AboutDialog QLabel#copyrightLabel,
-QDialog#AboutDialog QLabel#label_2 { /* About Dash Contents */
+QDialog#AboutDialog QLabel#label_2 { /* About BLOCX Contents */
     margin-left: 10px;
 }
 
-QDialog#AboutDialog QLabel#label_2 { /* Margin for About Dash text */
+QDialog#AboutDialog QLabel#label_2 { /* Margin for About BLOCX text */
     margin-right: 10px;
 }
 
@@ -1512,13 +1512,13 @@ QWidget .QFrame#frameCoinJoin .QWidget#layoutWidgetLastMessageAndButtons {
     max-width: 451px;
 }
 
-QWidget .QFrame#frameCoinJoin .QPushButton#toggleCoinJoin { /* Start CoinJoin Mixing */
+/* QWidget .QFrame#frameCoinJoin .QPushButton#toggleCoinJoin { /* Start CoinJoin Mixing
     margin-top: 5px;
 }
 
 QWidget .QFrame#frameCoinJoin .QPushButton#toggleCoinJoin:hover {
 
-}
+} */
 
 /******************************************************
 OverviewPage RecentTransactions

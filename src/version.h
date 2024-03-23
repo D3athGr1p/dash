@@ -56,6 +56,7 @@ static const int DMN_TYPE_PROTO_VERSION = 70227;
 //! Versioned Simplified Masternode List Entries were introduced in this version
 static const int SMNLE_VERSIONED_PROTO_VERSION = 70228;
 
+static const int DISABLE_COINJOIN_PROTO_VERSION = 70220;
 // Make sure that none of the values above collide with `ADDRV2_FORMAT`.
 
 #endif // BITCOIN_VERSION_H

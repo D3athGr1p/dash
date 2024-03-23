@@ -77,7 +77,7 @@
             <item>
              <widget class="QLabel" name="labelWalletStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the BLOCX network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>
@@ -365,7 +365,7 @@
          <layout class="QVBoxLayout" name="VerticalLayout_PS1">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_5">
-            <item>
+            <!-- <item>
              <widget class="QLabel" name="labelCoinJoinHeader">
               <property name="text">
                <string notr="true">CoinJoin</string>
@@ -375,7 +375,7 @@
             <item>
              <widget class="QLabel" name="labelCoinJoinSyncStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the BLOCX network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>
@@ -384,7 +384,7 @@
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
               </property>
              </widget>
-            </item>
+            </item> -->
             <item>
              <spacer name="horizontalSpacer_4">
               <property name="orientation">
@@ -400,7 +400,7 @@
             </item>
            </layout>
           </item>
-          <item>
+          <!-- <item>
            <layout class="QFormLayout" name="coinJoinFormLayout">
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
@@ -455,7 +455,7 @@
             <item row="2" column="1">
              <widget class="QLabel" name="labelAnonymized">
               <property name="text">
-               <string notr="true">0 DASH</string>
+               <string notr="true">0 BLOCX</string>
               </property>
              </widget>
             </item>
@@ -469,7 +469,7 @@
             <item row="3" column="1">
              <widget class="QLabel" name="labelAmountRounds">
               <property name="text">
-               <string>0 DASH / 0 Rounds</string>
+               <string>0 BLOCX / 0 Rounds</string>
               </property>
              </widget>
             </item>
@@ -493,8 +493,8 @@
               </property>
              </widget>
             </item>
-           </layout>
-          </item>
+           </layout> 
+          </item> -->
           <item>
            <layout class="QVBoxLayout" name="VerticalLayout_PS">
             <item>
@@ -515,7 +515,7 @@
                 </property>
                </spacer>
               </item>
-              <item>
+              <!-- <item>
                <widget class="QPushButton" name="toggleCoinJoin">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
@@ -527,7 +527,7 @@
                  <string>Start/Stop Mixing</string>
                 </property>
                </widget>
-              </item>
+              </item> -->
               <item>
                <spacer name="horizontalSpacer_6">
                 <property name="orientation">
@@ -612,7 +612,7 @@
             <item>
              <widget class="QLabel" name="labelTransactionsStatus">
               <property name="toolTip">
-               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the Dash network after a connection is established, but this process has not completed yet.</string>
+               <string>The displayed information may be out of date. Your wallet automatically synchronizes with the BLOCX network after a connection is established, but this process has not completed yet.</string>
               </property>
               <property name="text">
                <string notr="true">(out of sync)</string>

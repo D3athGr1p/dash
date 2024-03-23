@@ -113,13 +113,13 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
         ui->stackedWidgetOptions->removeWidget(ui->pageWallet);
         ui->btnWallet->hide();
         ui->stackedWidgetOptions->removeWidget(ui->pageCoinJoin);
-        ui->btnCoinJoin->hide();
+        // ui->btnCoinJoin->hide();
         ui->thirdPartyTxUrlsLabel->setVisible(false);
         ui->thirdPartyTxUrls->setVisible(false);
     } else {
-        ui->btnCoinJoin->setText(QString::fromStdString(gCoinJoinName));
+        // ui->btnCoinJoin->setText(QString::fromStdString(gCoinJoinName));
         pageButtons->addButton(ui->btnWallet, pageButtons->buttons().size());
-        pageButtons->addButton(ui->btnCoinJoin, pageButtons->buttons().size());
+        // pageButtons->addButton(ui->btnCoinJoin, pageButtons->buttons().size());
     }
     pageButtons->addButton(ui->btnNetwork, pageButtons->buttons().size());
     pageButtons->addButton(ui->btnDisplay, pageButtons->buttons().size());
@@ -502,7 +502,7 @@ void OptionsDialog::updateCoinJoinVisibility()
 #else
     bool fEnabled = false;
 #endif
-    ui->btnCoinJoin->setVisible(fEnabled);
+    // ui->btnCoinJoin->setVisible(fEnabled);
     GUIUtil::updateButtonGroupShortcuts(pageButtons);
 }
 
