@@ -57,16 +57,13 @@ void BlockAssembler::FillFoundersReward(CMutableTransaction& coinbaseTx, int nHe
     // Stage 2
     CScript devPayoutScript = GetScriptForDestination(DecodeDestination(params.DevelopmentFundAddress));
     CAmount devPayoutValue;
-    CBlockIndex* pindex = ::ChainActive()[nHeight];
-
-
 
     if(nHeight > 18000 && nHeight <= 24000) {
-        devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * 18) / 100;
+        devPayoutValue = (GetBlockSubsidy(nHeight, params) * 18) / 100;
     } else if (nHeight <= params.V3ForkHeight) {
-        devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * params.DevelopementFundShare) / 100;
+        devPayoutValue = (GetBlockSubsidy(nHeight, params) * params.DevelopementFundShare) / 100;
     } else {
-        devPayoutValue = (GetBlockSubsidy(pindex->nHeight, params) * (300.0/95.0)) / 100;
+        devPayoutValue = (GetBlockSubsidy(nHeight, params) * (300.0/95.0)) / 100;
     }
 
     coinbaseTx.vout[0].nValue -= devPayoutValue;
