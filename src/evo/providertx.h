@@ -35,7 +35,7 @@ public:
     }
 
     uint16_t nVersion{LEGACY_BLS_VERSION};                 // message version
-    MnType nType{MnType::Regular};
+    MnType nType{MnType::Standard_Masternode};
     uint16_t nMode{0};                                     // only 0 supported for now
     COutPoint collateralOutpoint{uint256(), (uint32_t)-1}; // if hash is null, we refer to a ProRegTx output
     CService addr;
@@ -71,7 +71,7 @@ public:
                 obj.scriptPayout,
                 obj.inputsHash
         );
-        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::Lite) {
             // READWRITE(
             //     obj.platformNodeID,
             //     obj.platformP2PPort,
@@ -106,7 +106,7 @@ public:
         }
         obj.pushKV("pubKeyOperator", pubKeyOperator.ToString());
         obj.pushKV("operatorReward", (double)nOperatorReward / 100);
-        // if (nType == MnType::HighPerformance) {
+        // if (nType == MnType::Lite) {
         //     obj.pushKV("platformNodeID", platformNodeID.ToString());
         //     obj.pushKV("platformP2PPort", platformP2PPort);
         //     obj.pushKV("platformHTTPPort", platformHTTPPort);
@@ -130,7 +130,7 @@ public:
     }
 
     uint16_t nVersion{LEGACY_BLS_VERSION}; // message version
-    MnType nType{MnType::Regular};
+    MnType nType{MnType::Standard_Masternode};
     uint256 proTxHash;
     CService addr;
     uint160 platformNodeID{};
@@ -159,7 +159,7 @@ public:
                 obj.scriptOperatorPayout,
                 obj.inputsHash
         );
-        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::HighPerformance) {
+        // if (obj.nVersion == BASIC_BLS_VERSION && obj.nType == MnType::Lite) {
         //     READWRITE(
         //         obj.platformNodeID,
         //         obj.platformP2PPort,
@@ -186,7 +186,7 @@ public:
         if (ExtractDestination(scriptOperatorPayout, dest)) {
             obj.pushKV("operatorPayoutAddress", EncodeDestination(dest));
         }
-        // if (nType == MnType::HighPerformance) {
+        // if (nType == MnType::Lite) {
         //     obj.pushKV("platformNodeID", platformNodeID.ToString());
         //     obj.pushKV("platformP2PPort", platformP2PPort);
         //     obj.pushKV("platformHTTPPort", platformHTTPPort);

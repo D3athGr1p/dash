@@ -584,7 +584,7 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
                                               const bool isPrepareRegister,
                                               const MnType mnType)
 {
-    const bool isHPMNrequested = mnType == MnType::HighPerformance;
+    const bool isHPMNrequested = mnType == MnType::Lite;
     if (isHPMNrequested) {
         if (isFundRegister && (request.fHelp || (request.params.size() < 10 || request.params.size() > 12))) {
             protx_register_fund_hpmn_help(request);
@@ -789,7 +789,7 @@ static UniValue protx_register_hpmn(const JSONRPCRequest& request)
     bool isExternalRegister = request.strMethod == "protxregister_hpmn";
     bool isFundRegister = request.strMethod == "protxregister_fund_hpmn";
     bool isPrepareRegister = request.strMethod == "protxregister_prepare_hpmn";
-    return protx_register_common_wrapper(request, false, isExternalRegister, isFundRegister, isPrepareRegister, MnType::HighPerformance);
+    return protx_register_common_wrapper(request, false, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Lite);
 }
 
 static UniValue protx_register(const JSONRPCRequest& request)
@@ -797,7 +797,7 @@ static UniValue protx_register(const JSONRPCRequest& request)
     bool isExternalRegister = request.strMethod == "protxregister";
     bool isFundRegister = request.strMethod == "protxregister_fund";
     bool isPrepareRegister = request.strMethod == "protxregister_prepare";
-    return protx_register_common_wrapper(request, false, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Regular);
+    return protx_register_common_wrapper(request, false, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Standard_Masternode);
 }
 
 static UniValue protx_register_legacy(const JSONRPCRequest& request)
@@ -805,7 +805,7 @@ static UniValue protx_register_legacy(const JSONRPCRequest& request)
     bool isExternalRegister = request.strMethod == "protxregister_legacy";
     bool isFundRegister = request.strMethod == "protxregister_fund_legacy";
     bool isPrepareRegister = request.strMethod == "protxregister_prepare_legacy";
-    return protx_register_common_wrapper(request, true, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Regular);
+    return protx_register_common_wrapper(request, true, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Standard_Masternode);
 }
 
 static UniValue protx_register_submit(const JSONRPCRequest& request)
@@ -888,7 +888,7 @@ static void protx_update_service_hpmn_help(const JSONRPCRequest& request)
 
 static UniValue protx_update_service_common_wrapper(const JSONRPCRequest& request, const MnType mnType)
 {
-    const bool isHPMNrequested = mnType == MnType::HighPerformance;
+    const bool isHPMNrequested = mnType == MnType::Lite;
     if (isHPMNrequested) {
         protx_update_service_hpmn_help(request);
     } else {
@@ -1368,7 +1368,7 @@ static UniValue protx_list(const JSONRPCRequest& request)
         bool onlyValid = type == "valid";
         bool onlyHPMN = type == "hpmn";
         mnList.ForEachMN(onlyValid, [&](const auto& dmn) {
-            if (onlyHPMN && dmn.nType != MnType::HighPerformance) return;
+            if (onlyHPMN && dmn.nType != MnType::Lite) return;
             ret.push_back(BuildDMNListEntry(wallet.get(), dmn, detailed));
         });
     } else {
@@ -1527,9 +1527,9 @@ static UniValue protx(const JSONRPCRequest& request)
     } else if (command == "protxregister_submit") {
         return protx_register_submit(new_request);
     } else if (command == "protxupdate_service") {
-        return protx_update_service_common_wrapper(new_request, MnType::Regular);
+        return protx_update_service_common_wrapper(new_request, MnType::Standard_Masternode);
     } else if (command == "protxupdate_service_hpmn") {
-        return protx_update_service_common_wrapper(new_request, MnType::HighPerformance);
+        return protx_update_service_common_wrapper(new_request, MnType::Lite);
     } else if (command == "protxupdate_registrar") {
         return protx_update_registrar(new_request);
     } else if (command == "protxupdate_registrar_legacy") {

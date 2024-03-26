@@ -34,10 +34,10 @@ public:
     CBLSLazyPublicKey pubKeyOperator;
     CKeyID keyIDVoting;
     bool isValid{false};
-    MnType nType{MnType::Regular};
+    MnType nType{MnType::Standard_Masternode};
     uint16_t platformHTTPPort{0};
     uint160 platformNodeID{};
-    CScript scriptPayout; // mem-only
+    CScript scriptPayout;         // mem-only
     CScript scriptOperatorPayout; // mem-only
     uint16_t nVersion{LEGACY_BLS_VERSION};
 
@@ -69,19 +69,18 @@ public:
             READWRITE(obj.nVersion);
         }
         READWRITE(
-                obj.proRegTxHash,
-                obj.confirmedHash,
-                obj.service,
-                CBLSLazyPublicKeyVersionWrapper(const_cast<CBLSLazyPublicKey&>(obj.pubKeyOperator), (obj.nVersion == LEGACY_BLS_VERSION)),
-                obj.keyIDVoting,
-                obj.isValid
-                );
+            obj.proRegTxHash,
+            obj.confirmedHash,
+            obj.service,
+            CBLSLazyPublicKeyVersionWrapper(const_cast<CBLSLazyPublicKey&>(obj.pubKeyOperator), (obj.nVersion == LEGACY_BLS_VERSION)),
+            obj.keyIDVoting,
+            obj.isValid);
         if ((s.GetType() & SER_NETWORK) && s.GetVersion() < DMN_TYPE_PROTO_VERSION) {
             return;
         }
         if (obj.nVersion == BASIC_BLS_VERSION) {
             READWRITE(obj.nType);
-            // if (obj.nType == MnType::HighPerformance) {
+            // if (obj.nType == MnType::Lite) {
             //     READWRITE(obj.platformHTTPPort);
             //     READWRITE(obj.platformNodeID);
             // }
@@ -150,13 +149,11 @@ public:
     CSimplifiedMNListDiff();
     ~CSimplifiedMNListDiff();
 
-    bool BuildQuorumsDiff(const CBlockIndex* baseBlockIndex, const CBlockIndex* blockIndex,
-                          const llmq::CQuorumBlockProcessor& quorum_block_processor);
+    bool BuildQuorumsDiff(const CBlockIndex* baseBlockIndex, const CBlockIndex* blockIndex, const llmq::CQuorumBlockProcessor& quorum_block_processor);
 
     void ToJson(UniValue& obj, bool extended = false) const;
 };
 
-bool BuildSimplifiedMNListDiff(const uint256& baseBlockHash, const uint256& blockHash, CSimplifiedMNListDiff& mnListDiffRet,
-                               const llmq::CQuorumBlockProcessor& quorum_block_processor, std::string& errorRet, bool extended = false);
+bool BuildSimplifiedMNListDiff(const uint256& baseBlockHash, const uint256& blockHash, CSimplifiedMNListDiff& mnListDiffRet, const llmq::CQuorumBlockProcessor& quorum_block_processor, std::string& errorRet, bool extended = false);
 
 #endif // BITCOIN_EVO_SIMPLIFIEDMNS_H

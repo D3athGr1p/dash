@@ -539,7 +539,7 @@ static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool
         CProUpServTx proTx;
         if (GetTxPayload(tx, proTx)) {
             auto dmn = deterministicMNManager->GetListAtChainTip().GetMN(proTx.proTxHash);
-            if (dmn->nType == MnType::HighPerformance) {
+            if (dmn->nType == MnType::Lite) {
                 return false;
             }
         }

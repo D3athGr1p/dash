@@ -882,6 +882,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
             }
         }
     }
+    aRules.push_back("dip0020");
     result.pushKV("version", pblock->nVersion);
     result.pushKV("rules", aRules);
     result.pushKV("vbavailable", vbavailable);

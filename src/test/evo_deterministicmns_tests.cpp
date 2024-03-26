@@ -18,9 +18,9 @@
 #include <txmempool.h>
 #include <validation.h>
 
-#include <evo/specialtx.h>
-#include <evo/providertx.h>
 #include <evo/deterministicmns.h>
+#include <evo/providertx.h>
+#include <evo/specialtx.h>
 #include <llmq/utils.h>
 
 #include <boost/test/unit_test.hpp>
@@ -111,7 +111,7 @@ static CMutableTransaction CreateProRegTx(const CTxMemPool& mempool, SimpleUTXOM
     CMutableTransaction tx;
     tx.nVersion = 3;
     tx.nType = TRANSACTION_PROVIDER_REGISTER;
-    FundTransaction(tx, utxos, scriptPayout, dmn_types::Regular.collat_amount, coinbaseKey);
+    FundTransaction(tx, utxos, scriptPayout, dmn_types::Standard_Masternode.collat_amount, coinbaseKey);
     proTx.inputsHash = CalcTxInputsHash(CTransaction(tx));
     SetTxPayload(tx, proTx);
     SignTransaction(mempool, tx, coinbaseKey);
@@ -178,7 +178,7 @@ static CMutableTransaction CreateProUpRevTx(const CTxMemPool& mempool, SimpleUTX
     return tx;
 }
 
-template<typename ProTx>
+template <typename ProTx>
 static CMutableTransaction MalleateProTxPayout(const CMutableTransaction& tx)
 {
     ProTx proTx;
@@ -362,8 +362,7 @@ void FuncV19Activation(TestChainSetup& setup)
     BOOST_ASSERT(dummmy_list == tip_list);
 
     // mine 10 more blocks
-    for (int i = 0; i < 10; ++i)
-    {
+    for (int i = 0; i < 10; ++i) {
         setup.CreateAndProcessBlock({}, setup.coinbaseKey);
         BOOST_ASSERT(llmq::utils::IsV19Active(::ChainActive().Tip()));
         BOOST_CHECK_EQUAL(::ChainActive().Height(), nHeight + 1 + i);
@@ -599,7 +598,7 @@ void FuncTestMempoolReorg(TestChainSetup& setup)
 
     // Create a MN with an external collateral
     CMutableTransaction tx_collateral;
-    FundTransaction(tx_collateral, utxos, scriptCollateral, dmn_types::Regular.collat_amount, setup.coinbaseKey);
+    FundTransaction(tx_collateral, utxos, scriptCollateral, dmn_types::Standard_Masternode.collat_amount, setup.coinbaseKey);
     SignTransaction(*(setup.m_node.mempool), tx_collateral, setup.coinbaseKey);
 
     auto block = std::make_shared<CBlock>(setup.CreateBlock({tx_collateral}, setup.coinbaseKey));
@@ -617,7 +616,7 @@ void FuncTestMempoolReorg(TestChainSetup& setup)
     payload.scriptPayout = scriptPayout;
 
     for (size_t i = 0; i < tx_collateral.vout.size(); ++i) {
-        if (tx_collateral.vout[i].nValue == dmn_types::Regular.collat_amount) {
+        if (tx_collateral.vout[i].nValue == dmn_types::Standard_Masternode.collat_amount) {
             payload.collateralOutpoint = COutPoint(tx_collateral.GetHash(), i);
             break;
         }
@@ -626,7 +625,7 @@ void FuncTestMempoolReorg(TestChainSetup& setup)
     CMutableTransaction tx_reg;
     tx_reg.nVersion = 3;
     tx_reg.nType = TRANSACTION_PROVIDER_REGISTER;
-    FundTransaction(tx_reg, utxos, scriptPayout, dmn_types::Regular.collat_amount, setup.coinbaseKey);
+    FundTransaction(tx_reg, utxos, scriptPayout, dmn_types::Standard_Masternode.collat_amount, setup.coinbaseKey);
     payload.inputsHash = CalcTxInputsHash(CTransaction(tx_reg));
     CMessageSigner::SignMessage(payload.MakeSignString(), payload.vchSig, collateralKey);
     SetTxPayload(tx_reg, payload);
@@ -686,7 +685,7 @@ void FuncTestMempoolDualProregtx(TestChainSetup& setup)
     payload.scriptPayout = scriptPayout;
 
     for (size_t i = 0; i < tx_reg1.vout.size(); ++i) {
-        if (tx_reg1.vout[i].nValue == dmn_types::Regular.collat_amount) {
+        if (tx_reg1.vout[i].nValue == dmn_types::Standard_Masternode.collat_amount) {
             payload.collateralOutpoint = COutPoint(tx_reg1.GetHash(), i);
             break;
         }
@@ -695,7 +694,7 @@ void FuncTestMempoolDualProregtx(TestChainSetup& setup)
     CMutableTransaction tx_reg2;
     tx_reg2.nVersion = 3;
     tx_reg2.nType = TRANSACTION_PROVIDER_REGISTER;
-    FundTransaction(tx_reg2, utxos, scriptPayout, dmn_types::Regular.collat_amount, setup.coinbaseKey);
+    FundTransaction(tx_reg2, utxos, scriptPayout, dmn_types::Standard_Masternode.collat_amount, setup.coinbaseKey);
     payload.inputsHash = CalcTxInputsHash(CTransaction(tx_reg2));
     CMessageSigner::SignMessage(payload.MakeSignString(), payload.vchSig, collateralKey);
     SetTxPayload(tx_reg2, payload);
@@ -730,7 +729,7 @@ void FuncVerifyDB(TestChainSetup& setup)
 
     // Create a MN with an external collateral
     CMutableTransaction tx_collateral;
-    FundTransaction(tx_collateral, utxos, scriptCollateral, dmn_types::Regular.collat_amount, setup.coinbaseKey);
+    FundTransaction(tx_collateral, utxos, scriptCollateral, dmn_types::Standard_Masternode.collat_amount, setup.coinbaseKey);
     SignTransaction(*(setup.m_node.mempool), tx_collateral, setup.coinbaseKey);
 
     auto block = std::make_shared<CBlock>(setup.CreateBlock({tx_collateral}, setup.coinbaseKey));
@@ -748,7 +747,7 @@ void FuncVerifyDB(TestChainSetup& setup)
     payload.scriptPayout = scriptPayout;
 
     for (size_t i = 0; i < tx_collateral.vout.size(); ++i) {
-        if (tx_collateral.vout[i].nValue == dmn_types::Regular.collat_amount) {
+        if (tx_collateral.vout[i].nValue == dmn_types::Standard_Masternode.collat_amount) {
             payload.collateralOutpoint = COutPoint(tx_collateral.GetHash(), i);
             break;
         }
@@ -757,7 +756,7 @@ void FuncVerifyDB(TestChainSetup& setup)
     CMutableTransaction tx_reg;
     tx_reg.nVersion = 3;
     tx_reg.nType = TRANSACTION_PROVIDER_REGISTER;
-    FundTransaction(tx_reg, utxos, scriptPayout, dmn_types::Regular.collat_amount, setup.coinbaseKey);
+    FundTransaction(tx_reg, utxos, scriptPayout, dmn_types::Standard_Masternode.collat_amount, setup.coinbaseKey);
     payload.inputsHash = CalcTxInputsHash(CTransaction(tx_reg));
     CMessageSigner::SignMessage(payload.MakeSignString(), payload.vchSig, collateralKey);
     SetTxPayload(tx_reg, payload);
@@ -841,7 +840,7 @@ BOOST_AUTO_TEST_CASE(test_mempool_dual_proregtx_basic)
     FuncTestMempoolDualProregtx(setup);
 }
 
-//This one can be started only with legacy scheme, since inside undo block will switch it back to legacy resulting into an inconsistency
+// This one can be started only with legacy scheme, since inside undo block will switch it back to legacy resulting into an inconsistency
 BOOST_AUTO_TEST_CASE(verify_db_legacy)
 {
     TestChainDIP3Setup setup;

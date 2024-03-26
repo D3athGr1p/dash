@@ -279,7 +279,7 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
     const Consensus::Params& consensusParams = Params().GetConsensus();
 
     const CBlockIndex* pindex = WITH_LOCK(cs_main, return ::ChainActive()[nBlockHeight - 1]);
-    auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(false, MnType::Regular);
+    auto dmnPayee = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(false, MnType::Standard_Masternode);
     if (!dmnPayee) {
         return false;
     }
@@ -292,7 +292,7 @@ bool CMasternodePayments::GetBlockTxOuts(int nBlockHeight, CAmount blockReward, 
     CDeterministicMNCPtr dmnPayee2;
 
     if (isMnTierForkActivated) {
-        dmnPayee2 = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(false, MnType::HighPerformance);
+        dmnPayee2 = deterministicMNManager->GetListForBlock(pindex).GetMNPayee(false, MnType::Lite);
 
         if (dmnPayee2) {
             mnTierOneReward = (masternodeReward * (4400.0/48.0)) / 100;

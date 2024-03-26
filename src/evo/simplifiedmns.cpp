@@ -74,7 +74,7 @@ void CSimplifiedMNListEntry::ToJson(UniValue& obj, bool extended) const
     obj.pushKV("pubKeyOperator", pubKeyOperator.ToString());
     obj.pushKV("votingAddress", EncodeDestination(PKHash(keyIDVoting)));
     obj.pushKV("isValid", isValid);
-    // if (nType == MnType::HighPerformance) {
+    // if (nType == MnType::Lite) {
     //     obj.pushKV("platformHTTPPort", platformHTTPPort);
     //     obj.pushKV("platformNodeID", platformNodeID.ToString());
     // }

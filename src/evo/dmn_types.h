@@ -12,8 +12,8 @@
 #include <string_view>
 
 enum class MnType : uint16_t {
-    Regular = 0,
-    HighPerformance = 1,
+    Standard_Masternode = 0,
+    Lite = 1,
     COUNT,
     Invalid = std::numeric_limits<uint16_t>::max(),
 };
@@ -29,15 +29,15 @@ struct mntype_struct
     const std::string_view description;
 };
 
-constexpr auto Regular = mntype_struct{
+constexpr auto Standard_Masternode = mntype_struct{
     .voting_weight = 10,
     .collat_amount = 100000 * COIN,
-    .description = "Regular",
+    .description = "Standard_Masternode",
 };
-constexpr auto HighPerformance = mntype_struct{
+constexpr auto Lite = mntype_struct{
     .voting_weight = 1,
     .collat_amount = 10000 * COIN,
-    .description = "HighPerformance",
+    .description = "Lite",
 };
 constexpr auto Invalid = mntype_struct{
     .voting_weight = 0,
@@ -47,8 +47,8 @@ constexpr auto Invalid = mntype_struct{
 
 [[nodiscard]] static constexpr bool IsCollateralAmount(CAmount amount)
 {
-    return amount == Regular.collat_amount ||
-        amount == HighPerformance.collat_amount;
+    return amount == Standard_Masternode.collat_amount ||
+        amount == Lite.collat_amount;
 }
 
 } // namespace dmn_types
@@ -56,8 +56,8 @@ constexpr auto Invalid = mntype_struct{
 [[nodiscard]] constexpr const dmn_types::mntype_struct GetMnType(MnType type)
 {
     switch (type) {
-        case MnType::Regular: return dmn_types::Regular;
-        case MnType::HighPerformance: return dmn_types::HighPerformance;
+        case MnType::Standard_Masternode: return dmn_types::Standard_Masternode;
+        case MnType::Lite: return dmn_types::Lite;
         default: return dmn_types::Invalid;
     }
 }

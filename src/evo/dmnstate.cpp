@@ -3,16 +3,16 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <evo/dmnstate.h>
-#include <evo/simplifiedmns.h>
 #include <evo/providertx.h>
+#include <evo/simplifiedmns.h>
 
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <script/standard.h>
 #include <validationinterface.h>
 
-#include <univalue.h>
 #include <messagesigner.h>
+#include <univalue.h>
 
 std::string CDeterministicMNState::ToString() const
 {
@@ -47,7 +47,7 @@ void CDeterministicMNState::ToJson(UniValue& obj, MnType nType) const
     obj.pushKV("revocationReason", nRevocationReason);
     obj.pushKV("ownerAddress", EncodeDestination(PKHash(keyIDOwner)));
     obj.pushKV("votingAddress", EncodeDestination(PKHash(keyIDVoting)));
-    // if (nType == MnType::HighPerformance) {
+    // if (nType == MnType::Lite) {
     //     obj.pushKV("platformNodeID", platformNodeID.ToString());
     //     obj.pushKV("platformP2PPort", platformP2PPort);
     //     obj.pushKV("platformHTTPPort", platformHTTPPort);

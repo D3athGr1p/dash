@@ -618,7 +618,7 @@ static UniValue masternodelist(const JSONRPCRequest& request)
                 return;
             }
         }
-        if (showHPMNsOnly && dmn.nType != MnType::HighPerformance) {
+        if (showHPMNsOnly && dmn.nType != MnType::Lite) {
             return;
         }
 
@@ -690,7 +690,7 @@ static UniValue masternodelist(const JSONRPCRequest& request)
             objMN.pushKV("payee", payeeStr);
             objMN.pushKV("status", dmnToStatus(dmn));
             objMN.pushKV("type", std::string(GetMnType(dmn.nType).description));
-            // if (dmn.nType == MnType::HighPerformance) {
+            // if (dmn.nType == MnType::Lite) {
             //     objMN.pushKV("platformNodeID", dmn.pdmnState->platformNodeID.ToString());
             //     objMN.pushKV("platformP2PPort", dmn.pdmnState->platformP2PPort);
             //     objMN.pushKV("platformHTTPPort", dmn.pdmnState->platformHTTPPort);

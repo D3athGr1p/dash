@@ -49,7 +49,7 @@ public:
     static constexpr uint16_t MN_CURRENT_FORMAT = MN_VERSION_FORMAT;
 
     CDeterministicMN() = delete; // no default constructor, must specify internalId
-    explicit CDeterministicMN(uint64_t _internalId, MnType mnType = MnType::Regular) :
+    explicit CDeterministicMN(uint64_t _internalId, MnType mnType = MnType::Standard_Masternode) :
         internalId(_internalId),
         nType(mnType)
     {
@@ -66,7 +66,7 @@ public:
     uint256 proTxHash;
     COutPoint collateralOutpoint;
     uint16_t nOperatorReward{0};
-    MnType nType{MnType::Regular};
+    MnType nType{MnType::Standard_Masternode};
     std::shared_ptr<const CDeterministicMNState> pdmnState;
 
     template <typename Stream, typename Operation>
@@ -97,7 +97,7 @@ public:
         if (format_version >= MN_TYPE_FORMAT && (s.GetVersion() == CLIENT_VERSION || s.GetVersion() >= DMN_TYPE_PROTO_VERSION)) {
             READWRITE(nType);
         } else {
-            nType = MnType::Regular;
+            nType = MnType::Standard_Masternode;
         }
     }
 
@@ -272,12 +272,12 @@ public:
 
     [[nodiscard]] size_t GetAllHPMNsCount() const
     {
-        return ranges::count_if(mnMap, [](const auto& p) { return p.second->nType == MnType::HighPerformance; });
+        return ranges::count_if(mnMap, [](const auto& p) { return p.second->nType == MnType::Lite; });
     }
 
     [[nodiscard]] size_t GetValidHPMNsCount() const
     {
-        return ranges::count_if(mnMap, [](const auto& p) { return p.second->nType == MnType::HighPerformance && IsMNValid(*p.second); });
+        return ranges::count_if(mnMap, [](const auto& p) { return p.second->nType == MnType::Lite && IsMNValid(*p.second); });
     }
 
     [[nodiscard]] size_t GetValidWeightedMNsCount() const
@@ -366,7 +366,7 @@ public:
     [[nodiscard]] CDeterministicMNCPtr GetValidMNByCollateral(const COutPoint& collateralOutpoint) const;
     [[nodiscard]] CDeterministicMNCPtr GetMNByService(const CService& service) const;
     [[nodiscard]] CDeterministicMNCPtr GetMNByInternalId(uint64_t internalId) const;
-    [[nodiscard]] CDeterministicMNCPtr GetMNPayee(bool isFullList, MnType type = MnType::Regular) const;
+    [[nodiscard]] CDeterministicMNCPtr GetMNPayee(bool isFullList, MnType type = MnType::Standard_Masternode) const;
 
     /**
      * Calculates the projected MN payees for the next *count* blocks. The result is not guaranteed to be correct
