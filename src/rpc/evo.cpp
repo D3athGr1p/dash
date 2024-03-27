@@ -46,7 +46,7 @@ static RPCArg GetRpcArg(const std::string& strParamName)
     static const std::map<std::string, RPCArg> mapParamHelp = {
         {"collateralAddress",
             {"collateralAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-                "The dash address to send the collateral to."}
+                "The blocx address to send the collateral to."}
         },
         {"collateralHash",
             {"collateralHash", RPCArg::Type::STR, RPCArg::Optional::NO,
@@ -117,17 +117,17 @@ static RPCArg GetRpcArg(const std::string& strParamName)
         },
         {"ownerAddress",
             {"ownerAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-                "The dash address to use for payee updates and proposal voting.\n"
+                "The blocx address to use for payee updates and proposal voting.\n"
                 "The corresponding private key does not have to be known by your wallet.\n"
                 "The address must be unused and must differ from the collateralAddress."}
         },
         {"payoutAddress_register",
             {"payoutAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-                "The dash address to use for masternode reward payments."}
+                "The blocx address to use for masternode reward payments."}
         },
         {"payoutAddress_update",
             {"payoutAddress", RPCArg::Type::STR, RPCArg::Optional::NO,
-                "The dash address to use for masternode reward payments.\n"
+                "The blocx address to use for masternode reward payments.\n"
                 "If set to an empty string, the currently active payout address is reused."}
         },
         {"proTxHash",
@@ -160,7 +160,7 @@ static RPCArg GetRpcArg(const std::string& strParamName)
         },
         {"platformP2PPort",
             {"platformP2PPort", RPCArg::Type::NUM, RPCArg::Optional::NO,
-                "TCP port of Dash Platform peer-to-peer communication between nodes (network byte order)."}
+                "TCP port of BLOCX Platform peer-to-peer communication between nodes (network byte order)."}
         },
         {"platformHTTPPort",
             {"platformHTTPPort", RPCArg::Type::NUM, RPCArg::Optional::NO,
@@ -359,7 +359,7 @@ static void protx_register_fund_help(const JSONRPCRequest& request, bool legacy)
     std::string pubkey_operator = legacy ? "\"0532646990082f4fd639f90387b1551f2c7c39d37392cb9055a06a7e85c1d23692db8f87f827886310bccc1e29db9aee\"" : "\"8532646990082f4fd639f90387b1551f2c7c39d37392cb9055a06a7e85c1d23692db8f87f827886310bccc1e29db9aee\"";
     std::string rpc_example = rpc_name.append(" \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" ").append(pubkey_operator).append(" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\"");
     RPCHelpMan{rpc_full_name,
-        "\nCreates, funds and sends a ProTx to the network. The resulting transaction will move 1000 Dash\n"
+        "\nCreates, funds and sends a ProTx to the network. The resulting transaction will move 1000 BLOCX\n"
         "to the address specified by collateralAddress and will then function as the collateral of your\n"
         "masternode.\n"
         "A few of the limitations you see in the arguments are temporary and might be lifted after DIP3\n"
@@ -477,13 +477,13 @@ static void protx_register_submit_help(const JSONRPCRequest& request)
     }.Check(request);
 }
 
-static void protx_register_fund_hpmn_help(const JSONRPCRequest& request)
+static void protx_register_fund_lite_help(const JSONRPCRequest& request)
 {
     RPCHelpMan{
-        "protx register_fund_hpmn",
-        "\nCreates, funds and sends a ProTx to the network. The resulting transaction will move 4000 Dash\n"
+        "protx register_fund_lite",
+        "\nCreates, funds and sends a ProTx to the network. The resulting transaction will move 4000 BLOCX\n"
         "to the address specified by collateralAddress and will then function as the collateral of your\n"
-        "HPMN.\n"
+        "LITE.\n"
         "A few of the limitations you see in the arguments are temporary and might be lifted after DIP3\n"
         "is fully deployed.\n" +
             HELP_REQUIRING_PASSPHRASE,
@@ -495,9 +495,9 @@ static void protx_register_fund_hpmn_help(const JSONRPCRequest& request)
             GetRpcArg("votingAddress_register"),
             GetRpcArg("operatorReward"),
             GetRpcArg("payoutAddress_register"),
-            GetRpcArg("platformNodeID"),
-            GetRpcArg("platformP2PPort"),
-            GetRpcArg("platformHTTPPort"),
+            // GetRpcArg("platformNodeID"),
+            // GetRpcArg("platformP2PPort"),
+            // GetRpcArg("platformHTTPPort"),
             GetRpcArg("fundAddress"),
             GetRpcArg("submit"),
         },
@@ -508,15 +508,15 @@ static void protx_register_fund_hpmn_help(const JSONRPCRequest& request)
                       RPCResult::Type::STR_HEX, "hex", "The serialized signed ProTx in hex format"},
         },
         RPCExamples{
-            HelpExampleCli("protx", "register_fund_hpmn \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
+            HelpExampleCli("protx", "register_fund_lite \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
     }.Check(request);
 }
 
-static void protx_register_hpmn_help(const JSONRPCRequest& request)
+static void protx_register_lite_help(const JSONRPCRequest& request)
 {
     RPCHelpMan{
-        "protx register_hpmn",
-        "\nSame as \"protx register_fund_hpmn\", but with an externally referenced collateral.\n"
+        "protx register_lite",
+        "\nSame as \"protx register_fund_lite\", but with an externally referenced collateral.\n"
         "The collateral is specified through \"collateralHash\" and \"collateralIndex\" and must be an unspent\n"
         "transaction output spendable by this wallet. It must also not be used by any other masternode.\n" +
             HELP_REQUIRING_PASSPHRASE,
@@ -529,9 +529,9 @@ static void protx_register_hpmn_help(const JSONRPCRequest& request)
             GetRpcArg("votingAddress_register"),
             GetRpcArg("operatorReward"),
             GetRpcArg("payoutAddress_register"),
-            GetRpcArg("platformNodeID"),
-            GetRpcArg("platformP2PPort"),
-            GetRpcArg("platformHTTPPort"),
+            // GetRpcArg("platformNodeID"),
+            // GetRpcArg("platformP2PPort"),
+            // GetRpcArg("platformHTTPPort"),
             GetRpcArg("feeSourceAddress"),
             GetRpcArg("submit"),
         },
@@ -542,14 +542,14 @@ static void protx_register_hpmn_help(const JSONRPCRequest& request)
                       RPCResult::Type::STR_HEX, "hex", "The serialized signed ProTx in hex format"},
         },
         RPCExamples{
-            HelpExampleCli("protx", "register_hpmn \"0123456701234567012345670123456701234567012345670123456701234567\" 0 \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
+            HelpExampleCli("protx", "register_lite \"0123456701234567012345670123456701234567012345670123456701234567\" 0 \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
     }.Check(request);
 }
 
-static void protx_register_prepare_hpmn_help(const JSONRPCRequest& request)
+static void protx_register_prepare_lite_help(const JSONRPCRequest& request)
 {
     RPCHelpMan{
-        "protx register_prepare_hpmn",
+        "protx register_prepare_lite",
         "\nCreates an unsigned ProTx and a message that must be signed externally\n"
         "with the private key that corresponds to collateralAddress to prove collateral ownership.\n"
         "The prepared transaction will also contain inputs and outputs to cover fees.\n",
@@ -562,9 +562,9 @@ static void protx_register_prepare_hpmn_help(const JSONRPCRequest& request)
             GetRpcArg("votingAddress_register"),
             GetRpcArg("operatorReward"),
             GetRpcArg("payoutAddress_register"),
-            GetRpcArg("platformNodeID"),
-            GetRpcArg("platformP2PPort"),
-            GetRpcArg("platformHTTPPort"),
+            // GetRpcArg("platformNodeID"),
+            // GetRpcArg("platformP2PPort"),
+            // GetRpcArg("platformHTTPPort"),
             GetRpcArg("feeSourceAddress"),
         },
         RPCResult{
@@ -573,7 +573,7 @@ static void protx_register_prepare_hpmn_help(const JSONRPCRequest& request)
                                               {RPCResult::Type::STR_HEX, "collateralAddress", "The collateral address"},
                                               {RPCResult::Type::STR_HEX, "signMessage", "The string message that needs to be signed with the collateral key"},
                                           }},
-        RPCExamples{HelpExampleCli("protx", "register_prepare_hpmn \"0123456701234567012345670123456701234567012345670123456701234567\" 0 \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
+        RPCExamples{HelpExampleCli("protx", "register_prepare_lite \"0123456701234567012345670123456701234567012345670123456701234567\" 0 \"1.2.3.4:1234\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" \"93746e8731c57f87f79b3620a7982924e2931717d49540a85864bd543de11c43fb868fd63e501a1db37e19ed59ae6db4\" \"Xt9AMWaYSz7tR7Uo7gzXA3m4QmeWgrR3rr\" 0 \"XrVhS9LogauRJGJu2sHuryjhpuex4RNPSb\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
     }.Check(request);
 }
 
@@ -584,14 +584,14 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
                                               const bool isPrepareRegister,
                                               const MnType mnType)
 {
-    const bool isHPMNrequested = mnType == MnType::Lite;
-    if (isHPMNrequested) {
-        if (isFundRegister && (request.fHelp || (request.params.size() < 10 || request.params.size() > 12))) {
-            protx_register_fund_hpmn_help(request);
-        } else if (isExternalRegister && (request.fHelp || (request.params.size() < 11 || request.params.size() > 13))) {
-            protx_register_hpmn_help(request);
-        } else if (isPrepareRegister && (request.fHelp || (request.params.size() != 11 && request.params.size() != 12))) {
-            protx_register_prepare_hpmn_help(request);
+    const bool isLITErequested = mnType == MnType::Lite;
+    if (isLITErequested) {
+        if (isFundRegister && (request.fHelp || (request.params.size() < 7 || request.params.size() > 9))) {
+            protx_register_fund_lite_help(request);
+        } else if (isExternalRegister && (request.fHelp || (request.params.size() < 8 || request.params.size() > 10))) {
+            protx_register_lite_help(request);
+        } else if (isPrepareRegister && (request.fHelp || (request.params.size() != 8 && request.params.size() != 9))) {
+            protx_register_prepare_lite_help(request);
         }
     } else {
         if (isFundRegister && (request.fHelp || (request.params.size() < 7 || request.params.size() > 9))) {
@@ -610,9 +610,11 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
         EnsureWalletIsUnlocked(wallet.get());
     }
 
-    bool isV19active = llmq::utils::IsV19Active(WITH_LOCK(cs_main, return ::ChainActive().Tip();));
-    if (isHPMNrequested && !isV19active) {
-        throw JSONRPCError(RPC_INVALID_REQUEST, "HPMN aren't allowed yet");
+    // bool isV19active = true;
+    // bool isV19active = llmq::utils::IsV19Active(WITH_LOCK(cs_main, return ::ChainActive().Tip();));
+    bool isV19active = ::ChainActive().Height() >= Params().GetConsensus().MNTierForkHeight;
+    if (isLITErequested && !isV19active) {
+        throw JSONRPCError(RPC_INVALID_REQUEST, "LITE aren't allowed yet");
     }
 
     size_t paramIdx = 0;
@@ -621,7 +623,7 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
     tx.nVersion = 3;
     tx.nType = TRANSACTION_PROVIDER_REGISTER;
 
-    const bool use_legacy = isV19active ? specific_legacy_bls_scheme : true;
+    const bool use_legacy =  true;
 
     CProRegTx ptx;
     ptx.nType = mnType;
@@ -684,26 +686,26 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, strprintf("invalid payout address: %s", request.params[paramIdx + 5].get_str()));
     }
 
-    if (isHPMNrequested) {
-        if (!IsHex(request.params[paramIdx + 6].get_str())) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformNodeID must be hexadecimal string");
-        }
-        ptx.platformNodeID.SetHex(request.params[paramIdx + 6].get_str());
+    // if (isLITErequested) {
+    //     if (!IsHex(request.params[paramIdx + 6].get_str())) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformNodeID must be hexadecimal string");
+    //     }
+    //     ptx.platformNodeID.SetHex(request.params[paramIdx + 6].get_str());
 
-        int32_t requestedPlatformP2PPort = ParseInt32V(request.params[paramIdx + 7], "platformP2PPort");
-        if (!ValidatePlatformPort(requestedPlatformP2PPort)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformP2PPort must be a valid port [1-65535]");
-        }
-        ptx.platformP2PPort = static_cast<uint16_t>(requestedPlatformP2PPort);
+    //     int32_t requestedPlatformP2PPort = ParseInt32V(request.params[paramIdx + 7], "platformP2PPort");
+    //     if (!ValidatePlatformPort(requestedPlatformP2PPort)) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformP2PPort must be a valid port [1-65535]");
+    //     }
+    //     ptx.platformP2PPort = static_cast<uint16_t>(requestedPlatformP2PPort);
 
-        int32_t requestedPlatformHTTPPort = ParseInt32V(request.params[paramIdx + 8], "platformHTTPPort");
-        if (!ValidatePlatformPort(requestedPlatformHTTPPort)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformHTTPPort must be a valid port [1-65535]");
-        }
-        ptx.platformHTTPPort = static_cast<uint16_t>(requestedPlatformHTTPPort);
+    //     int32_t requestedPlatformHTTPPort = ParseInt32V(request.params[paramIdx + 8], "platformHTTPPort");
+    //     if (!ValidatePlatformPort(requestedPlatformHTTPPort)) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformHTTPPort must be a valid port [1-65535]");
+    //     }
+    //     ptx.platformHTTPPort = static_cast<uint16_t>(requestedPlatformHTTPPort);
 
-        paramIdx += 3;
-    }
+    //     paramIdx += 3;
+    // }
 
     ptx.keyIDVoting = keyIDVoting;
     ptx.scriptPayout = GetScriptForDestination(payoutDest);
@@ -717,7 +719,7 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
     if (!request.params[paramIdx + 6].isNull()) {
         fundDest = DecodeDestination(request.params[paramIdx + 6].get_str());
         if (!IsValidDestination(fundDest))
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dash address: ") + request.params[paramIdx + 6].get_str());
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLOCX address: ") + request.params[paramIdx + 6].get_str());
     }
 
     FundSpecialTx(wallet.get(), tx, ptx, fundDest);
@@ -784,11 +786,11 @@ static UniValue protx_register_common_wrapper(const JSONRPCRequest& request,
     }
 }
 
-static UniValue protx_register_hpmn(const JSONRPCRequest& request)
+static UniValue protx_register_lite(const JSONRPCRequest& request)
 {
-    bool isExternalRegister = request.strMethod == "protxregister_hpmn";
-    bool isFundRegister = request.strMethod == "protxregister_fund_hpmn";
-    bool isPrepareRegister = request.strMethod == "protxregister_prepare_hpmn";
+    bool isExternalRegister = request.strMethod == "protxregister_lite";
+    bool isFundRegister = request.strMethod == "protxregister_fund_lite";
+    bool isPrepareRegister = request.strMethod == "protxregister_prepare_lite";
     return protx_register_common_wrapper(request, false, isExternalRegister, isFundRegister, isPrepareRegister, MnType::Lite);
 }
 
@@ -861,36 +863,36 @@ static void protx_update_service_help(const JSONRPCRequest& request)
     }.Check(request);
 }
 
-static void protx_update_service_hpmn_help(const JSONRPCRequest& request)
+static void protx_update_service_lite_help(const JSONRPCRequest& request)
 {
     RPCHelpMan{
-        "protx update_service_hpmn",
+        "protx update_service_lite",
         "\nCreates and sends a ProUpServTx to the network. This will update the IP address and the Platform fields\n"
-        "of a HPMN.\n"
-        "If this is done for a HPMN that got PoSe-banned, the ProUpServTx will also revive this HPMN.\n" +
+        "of a LITE.\n"
+        "If this is done for a LITE that got PoSe-banned, the ProUpServTx will also revive this LITE.\n" +
             HELP_REQUIRING_PASSPHRASE,
         {
             GetRpcArg("proTxHash"),
             GetRpcArg("ipAndPort_update"),
             GetRpcArg("operatorKey"),
-            GetRpcArg("platformNodeID"),
-            GetRpcArg("platformP2PPort"),
-            GetRpcArg("platformHTTPPort"),
+            // GetRpcArg("platformNodeID"),
+            // GetRpcArg("platformP2PPort"),
+            // GetRpcArg("platformHTTPPort"),
             GetRpcArg("operatorPayoutAddress"),
             GetRpcArg("feeSourceAddress"),
         },
         RPCResult{
             RPCResult::Type::STR_HEX, "txid", "The transaction id"},
         RPCExamples{
-            HelpExampleCli("protx", "update_service_hpmn \"0123456701234567012345670123456701234567012345670123456701234567\" \"1.2.3.4:1234\" \"5a2e15982e62f1e0b7cf9783c64cf7e3af3f90a52d6c40f6f95d624c0b1621cd\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
+            HelpExampleCli("protx", "update_service_lite \"0123456701234567012345670123456701234567012345670123456701234567\" \"1.2.3.4:1234\" \"5a2e15982e62f1e0b7cf9783c64cf7e3af3f90a52d6c40f6f95d624c0b1621cd\" \"f2dbd9b0a1f541a7c44d34a58674d0262f5feca5\" 22821 22822")},
     }.Check(request);
 }
 
 static UniValue protx_update_service_common_wrapper(const JSONRPCRequest& request, const MnType mnType)
 {
-    const bool isHPMNrequested = mnType == MnType::Lite;
-    if (isHPMNrequested) {
-        protx_update_service_hpmn_help(request);
+    const bool isLITErequested = mnType == MnType::Lite;
+    if (isLITErequested) {
+        protx_update_service_lite_help(request);
     } else {
         protx_update_service_help(request);
     }
@@ -901,8 +903,8 @@ static UniValue protx_update_service_common_wrapper(const JSONRPCRequest& reques
     EnsureWalletIsUnlocked(wallet.get());
 
     bool isV19active = llmq::utils::IsV19Active(WITH_LOCK(cs_main, return ::ChainActive().Tip();));
-    if (isHPMNrequested && !isV19active) {
-        throw JSONRPCError(RPC_INVALID_REQUEST, "HPMN aren't allowed yet");
+    if (isLITErequested && !isV19active) {
+        throw JSONRPCError(RPC_INVALID_REQUEST, "LITE aren't allowed yet");
     }
 
     CProUpServTx ptx;
@@ -916,26 +918,26 @@ static UniValue protx_update_service_common_wrapper(const JSONRPCRequest& reques
     CBLSSecretKey keyOperator = ParseBLSSecretKey(request.params[2].get_str(), "operatorKey");
 
     size_t paramIdx = 3;
-    if (isHPMNrequested) {
-        if (!IsHex(request.params[paramIdx].get_str())) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformNodeID must be hexadecimal string");
-        }
-        ptx.platformNodeID.SetHex(request.params[paramIdx].get_str());
+    // if (isLITErequested) {
+    //     if (!IsHex(request.params[paramIdx].get_str())) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformNodeID must be hexadecimal string");
+    //     }
+    //     ptx.platformNodeID.SetHex(request.params[paramIdx].get_str());
 
-        int32_t requestedPlatformP2PPort = ParseInt32V(request.params[paramIdx + 1], "platformP2PPort");
-        if (!ValidatePlatformPort(requestedPlatformP2PPort)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformP2PPort must be a valid port [1-65535]");
-        }
-        ptx.platformP2PPort = static_cast<uint16_t>(requestedPlatformP2PPort);
+    //     int32_t requestedPlatformP2PPort = ParseInt32V(request.params[paramIdx + 1], "platformP2PPort");
+    //     if (!ValidatePlatformPort(requestedPlatformP2PPort)) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformP2PPort must be a valid port [1-65535]");
+    //     }
+    //     ptx.platformP2PPort = static_cast<uint16_t>(requestedPlatformP2PPort);
 
-        int32_t requestedPlatformHTTPPort = ParseInt32V(request.params[paramIdx + 2], "platformHTTPPort");
-        if (!ValidatePlatformPort(requestedPlatformHTTPPort)) {
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "platformHTTPPort must be a valid port [1-65535]");
-        }
-        ptx.platformHTTPPort = static_cast<uint16_t>(requestedPlatformHTTPPort);
+    //     int32_t requestedPlatformHTTPPort = ParseInt32V(request.params[paramIdx + 2], "platformHTTPPort");
+    //     if (!ValidatePlatformPort(requestedPlatformHTTPPort)) {
+    //         throw JSONRPCError(RPC_INVALID_PARAMETER, "platformHTTPPort must be a valid port [1-65535]");
+    //     }
+    //     ptx.platformHTTPPort = static_cast<uint16_t>(requestedPlatformHTTPPort);
 
-        paramIdx += 3;
-    }
+    //     paramIdx += 3;
+    // }
 
     auto dmn = deterministicMNManager->GetListAtChainTip().GetMN(ptx.proTxHash);
     if (!dmn) {
@@ -975,7 +977,7 @@ static UniValue protx_update_service_common_wrapper(const JSONRPCRequest& reques
     if (!request.params[paramIdx + 1].isNull()) {
         feeSource = DecodeDestination(request.params[paramIdx + 1].get_str());
         if (!IsValidDestination(feeSource))
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dash address: ") + request.params[paramIdx + 1].get_str());
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLOCX address: ") + request.params[paramIdx + 1].get_str());
     } else {
         if (ptx.scriptOperatorPayout != CScript()) {
             // use operator reward address as default source for fees
@@ -1040,7 +1042,7 @@ static UniValue protx_update_registrar_wrapper(const JSONRPCRequest& request, co
     ptx.keyIDVoting = dmn->pdmnState->keyIDVoting;
     ptx.scriptPayout = dmn->pdmnState->scriptPayout;
 
-    const bool use_legacy = llmq::utils::IsV19Active(::ChainActive().Tip()) ? specific_legacy_bls_scheme : true;
+    const bool use_legacy = true;
 
     if (request.params[1].get_str() != "") {
         // new pubkey
@@ -1088,7 +1090,7 @@ static UniValue protx_update_registrar_wrapper(const JSONRPCRequest& request, co
     if (!request.params[4].isNull()) {
         feeSourceDest = DecodeDestination(request.params[4].get_str());
         if (!IsValidDestination(feeSourceDest))
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dash address: ") + request.params[4].get_str());
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLOCX address: ") + request.params[4].get_str());
     }
 
     FundSpecialTx(wallet.get(), tx, ptx, feeSourceDest);
@@ -1170,7 +1172,7 @@ static UniValue protx_revoke(const JSONRPCRequest& request)
     if (!request.params[3].isNull()) {
         CTxDestination feeSourceDest = DecodeDestination(request.params[3].get_str());
         if (!IsValidDestination(feeSourceDest))
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Dash address: ") + request.params[3].get_str());
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLOCX address: ") + request.params[3].get_str());
         FundSpecialTx(wallet.get(), tx, ptx, feeSourceDest);
     } else if (dmn->pdmnState->scriptOperatorPayout != CScript()) {
         // Using funds from previousely specified operator payout address
@@ -1204,7 +1206,7 @@ static void protx_list_help(const JSONRPCRequest& request)
                 "  registered   - List all ProTx which are registered at the given chain height.\n"
                 "                 This will also include ProTx which failed PoSe verification.\n"
                 "  valid        - List only ProTx which are active/valid at the given chain height.\n"
-                "  hpmn         - List only ProTx corresponding to HPMNs at the given chain height.\n"
+                "  lite         - List only ProTx corresponding to LITEs at the given chain height.\n"
 #ifdef ENABLE_WALLET
                 "  wallet       - List only ProTx which are found in your wallet at the given chain height.\n"
                 "                 This will also include ProTx which failed PoSe verification.\n"
@@ -1350,7 +1352,7 @@ static UniValue protx_list(const JSONRPCRequest& request)
             }
         });
 #endif
-    } else if (type == "valid" || type == "registered" || type == "hpmn") {
+    } else if (type == "valid" || type == "registered" || type == "lite") {
         if (request.params.size() > 3) {
             protx_list_help(request);
         }
@@ -1366,9 +1368,9 @@ static UniValue protx_list(const JSONRPCRequest& request)
 
         CDeterministicMNList mnList = deterministicMNManager->GetListForBlock(::ChainActive()[height]);
         bool onlyValid = type == "valid";
-        bool onlyHPMN = type == "hpmn";
+        bool onlyLITE = type == "lite";
         mnList.ForEachMN(onlyValid, [&](const auto& dmn) {
-            if (onlyHPMN && dmn.nType != MnType::Lite) return;
+            if (onlyLITE && dmn.nType != MnType::Lite) return;
             ret.push_back(BuildDMNListEntry(wallet.get(), dmn, detailed));
         });
     } else {
@@ -1486,9 +1488,9 @@ static UniValue protx_diff(const JSONRPCRequest& request)
         "  register                 - Create and send ProTx to network\n"
         "  register_fund            - Fund, create and send ProTx to network\n"
         "  register_prepare         - Create an unsigned ProTx\n"
-        "  register_hpmn            - Create and send ProTx to network for a HPMN\n"
-        "  register_fund_hpmn       - Fund, create and send ProTx to network for a HPMN\n"
-        "  register_prepare_hpmn    - Create an unsigned ProTx for a HPMN\n"
+        "  register_lite            - Create and send ProTx to network for a LITE\n"
+        "  register_fund_lite       - Fund, create and send ProTx to network for a LITE\n"
+        "  register_prepare_lite    - Create an unsigned ProTx for a LITE\n"
         "  register_legacy          - Create a ProTx by parsing BLS using the legacy scheme and send it to network\n"
         "  register_fund_legacy     - Fund and create a ProTx by parsing BLS using the legacy scheme, then send it to network\n"
         "  register_prepare_legacy  - Create an unsigned ProTx by parsing BLS using the legacy scheme\n"
@@ -1498,7 +1500,7 @@ static UniValue protx_diff(const JSONRPCRequest& request)
         "  info                     - Return information about a ProTx\n"
 #ifdef ENABLE_WALLET
         "  update_service           - Create and send ProUpServTx to network\n"
-        "  update_service_hpmn      - Create and send ProUpServTx to network for a HPMN\n"
+        "  update_service_lite      - Create and send ProUpServTx to network for a LITE\n"
         "  update_registrar         - Create and send ProUpRegTx to network\n"
         "  update_registrar_legacy  - Create ProUpRegTx by parsing BLS using the legacy scheme, then send it to network\n"
         "  revoke                   - Create and send ProUpRevTx to network\n"
@@ -1520,15 +1522,15 @@ static UniValue protx(const JSONRPCRequest& request)
 #ifdef ENABLE_WALLET
     if (command == "protxregister" || command == "protxregister_fund" || command == "protxregister_prepare") {
         return protx_register(new_request);
-    } else if (command == "protxregister_hpmn" || command == "protxregister_fund_hpmn" || command == "protxregister_prepare_hpmn") {
-        return protx_register_hpmn(new_request);
+    } else if (command == "protxregister_lite" || command == "protxregister_fund_lite" || command == "protxregister_prepare_lite") {
+        return protx_register_lite(new_request);
     } else if (command == "protxregister_legacy" || command == "protxregister_fund_legacy" || command == "protxregister_prepare_legacy") {
         return protx_register_legacy(new_request);
     } else if (command == "protxregister_submit") {
         return protx_register_submit(new_request);
     } else if (command == "protxupdate_service") {
         return protx_update_service_common_wrapper(new_request, MnType::Standard_Masternode);
-    } else if (command == "protxupdate_service_hpmn") {
+    } else if (command == "protxupdate_service_lite") {
         return protx_update_service_common_wrapper(new_request, MnType::Lite);
     } else if (command == "protxupdate_registrar") {
         return protx_update_registrar(new_request);
