@@ -4036,7 +4036,7 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
                 break;
         }
         if (!found)
-            return state.Invalid(ValidationInvalidReason::TX_MISSING_INPUTS, "Developer reward check failed");
+            return state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-cb-tx", "Developer reward check failed");
     }
 
     if(isExtraFundAllocationHeight(nHeight)) {
@@ -4050,8 +4050,7 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
                 break;
         }
         if (!found) {
-            LogPrintf("nHeight is in dev reward is :>>>>>>>>>>> %d: %d: %d\n", nHeight, extraFund);
-            return state.Invalid(ValidationInvalidReason::TX_MISSING_INPUTS, "Extra reward allocation check failed");
+            return state.Invalid(ValidationInvalidReason::CONSENSUS, false, REJECT_INVALID, "bad-cb-tx", "Extra reward allocation check failed");
         }
     }
 
